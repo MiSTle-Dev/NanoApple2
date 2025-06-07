@@ -1,0 +1,76 @@
+set_device GW2AR-LV18QN88C8/I7 -name GW2AR-18C
+
+add_file mockingboard/YM2149.sv
+add_file src/dualshock2.v
+add_file src/gen_uart.v
+add_file src/gowin_dpb/gowin_dpb_trkbuf.v
+add_file src/gowin_dpb/sector_dpram.v
+add_file src/hdmi/audio_clock_regeneration_packet.sv
+add_file src/hdmi/audio_info_frame.sv
+add_file src/hdmi/audio_sample_packet.sv
+add_file src/hdmi/auxiliary_video_information_info_frame.sv
+add_file src/hdmi/hdmi.sv
+add_file src/hdmi/packet_assembler.sv
+add_file src/hdmi/packet_picker.sv
+add_file src/hdmi/serializer.sv
+add_file src/hdmi/source_product_description_info_frame.sv
+add_file src/hdmi/tmds_channel.sv
+add_file src/loader_sd_card.sv
+add_file src/misc/hid.v
+add_file src/misc/mcu_spi.v
+add_file src/misc/osd_u8g2.v
+add_file src/misc/scandoubler.v>
+add_file src/misc/sd_card.v
+add_file src/misc/sd_rw.v
+add_file src/misc/sdcmd_ctrl.v
+add_file src/misc/sysctrl.v
+add_file src/misc/video.v
+add_file src/misc/video_analyzer.v
+add_file src/misc/ws2812.v
+add_file src/sdram_tn20k.sv
+add_file T65/T65.vhd
+add_file T65/T65_ALU.vhd
+add_file T65/T65_MCode.vhd
+add_file T65/T65_Pack.vhd
+add_file mockingboard/mockingboard.vhd
+add_file mockingboard/via6522.vhd
+add_file src/CEGen.vhd
+add_file src/R65Cx2.vhd
+add_file src/apple2.vhd
+add_file src/disk_ii.vhd
+add_file src/disk_ii_rom.vhd
+add_file src/drive_ii.vhd
+add_file src/gowin_dpb/gowin_dpb_track_buffer_b.vhd
+add_file src/gowin_prom/gowin_prom_apple2.vhd
+add_file src/gowin_prom/gowin_prom_key.vhd
+add_file src/gowin_prom/gowin_prom_mouse.vhd
+add_file src/gowin_prom/gowin_prom_mousemcu.vhd
+add_file src/gowin_prom/gowin_prom_video.vhd
+add_file src/gowin_rpll/gowin_rpll_tn20k.vhd
+add_file src/hdd.vhd
+add_file src/hdd_rom.vhd
+add_file src/keyboard.vhd
+add_file src/spram.vhd
+add_file src/ssc.vhd
+add_file src/ssc_rom.vhd
+add_file src/tang/nano20k/apple2e_nano.vhd
+add_file src/timing_generator.vhd
+add_file src/tv_controller.vhd
+add_file src/video_generator.vhd
+add_file src/tang/nano20k/apple2e_nano.cst
+add_file src/tang/nano20k/apple2e_nano.sdc
+
+set_option -synthesis_tool gowinsynthesis
+set_option -output_base_name apple2e_nano_tn20k
+set_option -verilog_std sysv2017
+set_option -vhdl_std vhd2008
+set_option -top_module apple2e_nano
+set_option -use_mspi_as_gpio 1
+set_option -use_sspi_as_gpio 1
+set_option -print_all_synthesis_warning 1
+set_option -rw_check_on_ram 0
+set_option -user_code 00000001
+set_option -bit_security 1
+
+#run syn
+run all

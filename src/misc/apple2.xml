@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Apple IIe configuration -->
+<config name="NanoAppleIIe" version="0">
+  <actions>
+    <!-- the init action is being executed immediately -->
+    <!-- when this file has been loaded -->
+    <action name="init">
+      <!-- (try to) load config from sd card -->
+      <load file="apple2e.ini"/>
+      <set id="R" value="3"/>  <!-- keep machine in cold reset -->
+    </action>
+    
+    <!-- the ready action is being executed once all -->
+    <!-- initialization has been done -->
+    <action name="ready">
+      <set id="R" value="0"/>  <!-- release reset -->
+    </action>
+      
+    <action name="save">
+      <!-- save config to sd card -->
+      <save file="apple2e.ini"/>
+    </action>
+      
+    <action name="reset">
+      <!-- trigger a system reset -->
+      <set id="R" value="1"/>
+      <delay ms="10"/>
+      <set id="R" value="0"/>      
+    </action>
+    
+    <action name="reset_hide">
+      <!-- trigger a system reset and hide OSD -->
+      <link action="reset"/>
+      <hide/>      
+    </action>      
+
+    <action name="cold_reset">
+      <!-- trigger a cold system reset -->
+      <set id="R" value="3"/>
+      <delay ms="10"/>
+      <set id="R" value="0"/>      
+    </action>
+    
+    <action name="cold_reset_hide">
+      <!-- trigger a cold reset and hide OSD -->
+      <link action="cold_reset"/>
+      <hide/>      
+    </action>
+  </actions>
+  
+  <menu label="Nano Apple IIe">
+ <button label="Cold Reset" action="cold_reset_hide"/>
+    <menu label="System">
+      <list label="Joyport:" id="Q" default="0">
+ <listentry label="USB #1 Padd" value="0"/>
+ <listentry label="USB #2 Padd" value="1"/>
+ <listentry label="DS #1 Paddle" value="2"/>
+ <listentry label="DS #2 Paddle" value="3"/>
+ <listentry label="Off" value="4"/>
+      </list>
+      <list label="CPU Type:" id="M" default="0" action="cold_reset_hide">
+ <listentry label="6502" value="0"/>
+ <listentry label="65C02" value="1"/>
+      </list>
+      <list label="Monitor:" id="C" default="0">
+ <listentry label="Color" value="0"/>
+ <listentry label="B&W" value="1"/>
+ <listentry label="Green" value="2"/>
+ <listentry label="Amber" value="3"/>
+      </list>
+      <list label="Color palette:" id="D" default="0">
+ <listentry label="NTSC //e" value="0"/>
+ <listentry label="IIgs" value="1"/>
+ <listentry label="AppleWin" value="2"/>
+ <listentry label="apple2fpga" value="3"/>
+      </list>
+      <list label="SSC S2:" id="U" default="1" action="cold_reset_hide">
+ <listentry label="Off" value="0"/>
+ <listentry label="On" value="1"/>
+      </list>
+      <list label="Mocking S4:" id="X" default="1" action="cold_reset_hide">
+ <listentry label="Off" value="0"/>
+ <listentry label="On" value="1"/>
+      </list>
+      <list label="Mouse S5:" id="Y" default="0" action="cold_reset_hide">
+ <listentry label="Off" value="0"/>
+ <listentry label="On" value="1"/>
+      </list>
+      <list label="HDD S7:" id="N" default="1" action="cold_reset_hide">
+ <listentry label="Off" value="0"/>
+ <listentry label="On" value="1"/>
+      </list>
+      <list label="Video Rom:" id="G" default="0">
+ <listentry label="US" value="0"/>
+ <listentry label="Local" value="1"/>
+      </list>
+      <list label="Video Std:" id="E" default="1" action="cold_reset_hide">
+ <listentry label="PAL" value="0"/>
+ <listentry label="NTSC" value="1"/>
+      </list>
+      <list label="Joysticks:" id="V" default="0">
+ <listentry label="Normal" value="0"/>
+ <listentry label="Swapped" value="1"/>
+      </list>
+      <list label="Analog X/Y:" id="I" default="0">
+ <listentry label="Normal" value="0"/>
+ <listentry label="Swapped" value="1"/>
+      </list>
+      <list label="RS232 port:" id="*" default="0">
+ <listentry label="Tang USB-C" value="0"/>
+ <listentry label="External" value="1"/>
+ <listentry label="WIFI Modem" value="2"/>
+      </list>
+ <button label="Cold Boot" action="cold_reset_hide"/>
+    </menu>
+    <menu label="Storage">
+      <fileselector label="Disk 0:" ext="nib;dsk;do;po" index="0" default="disk0.nib"/>
+      <fileselector label="Disk 1:" ext="nib;dsk;do;po" index="1" default="disk1.nib"/>
+      <fileselector label="HDD:" ext="hdv" index="2" default="hdd.hdv"/>
+      <fileselector label="Load Video ROM:" ext="bin" index="3"/>
+      <list label="Disk prot.:" id="P" default="0">
+	<listentry label="None" value="0"/>
+	<listentry label="Disk 0" value="1"/>
+	<listentry label="Disk 1" value="2"/>
+	<listentry label="Disk 0&1" value="3"/>
+      </list>
+      <list label="HDD prot.:" id="J" default="1">
+	<listentry label="OFF" value="0"/>
+	<listentry label="ON" value="1"/>
+      </list>
+    </menu>
+    <menu label="Settings">
+      <list label="Screen:" id="W" default="0">
+	<listentry label="Normal" value="0"/>
+	<listentry label="Wide" value="1"/>
+      </list>
+      <list label="Scanlines:" id="S" default="0">
+	<listentry label="None" value="0"/>
+	<listentry label="25%" value="1"/>
+	<listentry label="50%" value="2"/>
+	<listentry label="75%" value="3"/>
+      </list>
+      <list label="Volume:" id="A" default="2">
+	<listentry label="Mute" value="0"/>
+	<listentry label="33%" value="1"/>
+	<listentry label="66%" value="2"/>
+	<listentry label="100%" value="3"/>
+      </list>
+      <button label="Save settings" action="save"/>
+    </menu>
+    <button label="Reset" action="reset_hide"/>
+  </menu>
+</config>
