@@ -4,8 +4,8 @@ The Nano Apple IIe is a port of both [MiSTer](https://github.com/MiSTer-devel/Ap
 
 | Board      | FPGA       | support |Note|
 | ---        |        -   | -     |-|
-| [Tang Nano 20k](https://wiki.sipeed.com/nano20k)     | [GW2AR](https://www.gowinsemi.com/en/product/detail/38/)  |HDMI / LCD  |twin Dualshock<br> MiSTeryShield20k spare header + Joy to DIP |
-| [Tang Console 60K NEO](https://wiki.sipeed.com/hardware/en/tang/tang-console/mega-console.html)|[GW5AT-60](https://www.gowinsemi.com/en/product/detail/60/) | HDMI / LCD |twin Dualshock|
+| [Tang Nano 20k](https://wiki.sipeed.com/nano20k)     | [GW2AR](https://www.gowinsemi.com/en/product/detail/38/)  |HDMI | |
+| [Tang Console 60K NEO](https://wiki.sipeed.com/hardware/en/tang/tang-console/mega-console.html)|[GW5AT-60](https://www.gowinsemi.com/en/product/detail/60/) | HDMI / LCD ||
 
 The project is still a work in progress.  
 Please report findings as issue.  
@@ -34,26 +34,26 @@ All HID, SDcard and µC firmware by [Till Harbaum](http://www.harbaum.org/till/m
 Features:
 * HDMI Video and Audio Output
 * TFT-LCD module 800x600 [SH500Q01Z](https://dl.sipeed.com/Accessories/LCD/500Q01Z-00%20spec.pdf) + Speaker support
-* [USB Keyboard](https://en.wikipedia.org/wiki/Computer_keyboard) USB Keyboard
-* [USB Gamepad](https://en.wikipedia.org/wiki/Gamepad) Stick as paddle emulation
+* [USB Keyboard](https://en.wikipedia.org/wiki/Computer_keyboard)
+* [USB Gamepad](https://en.wikipedia.org/wiki/Gamepad)
 * [USB XBOX 360 Controller](https://en.wikipedia.org/wiki/Xbox_360_controller)
-* [Dualshock 2 Controller Gamepad](https://en.wikipedia.org/wiki/DualShock) for [MiSTeryShield20k](https://github.com/harbaum/MiSTeryNano/tree/main/board/misteryshield20k/README.md) via spare [pinheader](/board/misteryshield20k_ds2_adapter/misteryshield20k_ds2_adapter_cable.md)
+* [Dualshock 2 Controller Gamepad](https://en.wikipedia.org/wiki/DualShock) for [MiSTeryShield20k / MiSTeryShield20kPico](https://github.com/harbaum/MiSTeryNano/tree/main/board/misteryshield20k/README.md) via spare [pinheader](/board/misteryshield20k_ds2_adapter/misteryshield20k_ds2_adapter_cable.md)
 * Disk loading via OSD. supported formats: .NIB
 * HDD loading via OSD. supported formats: .HDV (raw ProDOS partition images, 32MB)
 * Selectable 6502 or 65C02 CPU
 * Joystick support
 * Scanlines
-* Color, amber, green and black&white monitor
-* selection of color palette (NTSC //e, Apple IIgs, AppleWin, Custom)
+* Monitor type: Color, amber, green and black&white
+* Selection of color palette (NTSC //e, Apple IIgs, AppleWin, Custom)
 * Language card in slot 0
 * Super Serial Card in slot 2
-* 64K base + 64K auxilary RAM with 80 column and double hi-res support (256KB total with Saturn 128K)
+* 64K base + 64K auxilary RAM with 80 column and double hi-res support
 * Mockingboard model A (two AY-3-8913 chips for six audio channels) in slot 4
 
 Planned features:
 
 * Tang Mega 138k Pro, Mega 60k, Primer 25k support
-* Mouse support in slot 6
+* Mouse support
 * Load custom video ROM
 * SSC configuartion
 * FPGA companion build in WIFI modem via SSC
@@ -97,7 +97,9 @@ The installation on the Tang Nano 20k board can be done using a Linux PC or a Wi
 On the "Apple //e" boot screen open the OSD with F12 and choose a nibblelized disk. It will boot
 the disk automatically. Use dsk2nib to convert AppleII disk images to .nib images.  
 
-For HDD, only HDV images (raw ProDOS partition images) 32MB in size are supported. 2MG images may work if the 64-byte header is removed.
+For HDD, only HDV images (raw ProDOS partition images) 32MB in size are supported.  
+A Cold Reset is needed to boot from HDD.
+2MG images may work if the 64-byte header is removed.
 ```bash
 dd if=diskimage.2mg of=diskimage.hdv bs=64 skip=1
 ```
@@ -122,12 +124,7 @@ or
 *C600G
 ```
 
-The call command will enter the Monitor. Type the call a second time if the * prompt won't
-show the first time. 
-At the Monitor you can also type 6 and then Ctrl-P followed by return.
-See https://web.archive.org/web/20140827184511/http://vectronicsappleworld.com:80/appleii/dos.html#bootdos
-
-The HDD interface is in slot 7. Unlike the floppy interface, it does not stall until an image is mounted, so either reset the machine or use one of the following after mounting an image:
+The HDD interface is in slot 7. Unlike the floppy interface, it does not stall until an image is mounted, so either cold reset the machine or use one of the following after mounting an image:
 
 ```
 ]PR#7
@@ -148,6 +145,10 @@ invoke by F12 keypress
 * Cold Reset
 * Audio Volume + / -
 * Scanlines effect %
+* Monitor type
+* Color Palette
+* SSC, HDD, MB, Mouse disable/ enable
+* CPU type
 * HID device selection for Joystick Port
 * Invert X/Y
 
@@ -155,23 +156,20 @@ invoke by F12 keypress
 
 ![controller](\.assets/controller-layout.png)  
 
-USB Joystick(s) or Gamepad(s). OSD: **USB #1 Joy** or **USB #2 Joy**  
-Also [RII Mini Keyboard i8](http://www.riitek.com/product/220.html) left Multimedia Keys are active if **USB #1 Joy** selected.  
+USB Joystick(s) or Gamepad(s) Stick as Joystick (no DPAD). OSD: **USB #1 Joy** or **USB #2 Joy**  
 ```Button A and B``` Buttons as Trigger:  
 
 or  
-Dualshock 2 Gamepad Stick or Dpad as Joystick. OSD: **DS #1 Joy** or **DS #2 Joy**<br>
-At the moment Dpad only for original Pad. Some clone devices support at the same time Dpad and left stick simultaniously.
-<br>```circle and cross``` Buttons as Trigger:<br>
+Dualshock 2 Gamepad Stick as Joystick. OSD: **DS #1 Joy** or **DS #2 Joy**<br>
+<br>```square and cross``` Buttons as Trigger:<br>
 
 > [!IMPORTANT]
-> In a [MiSTeryShield20k](https://github.com/harbaum/MiSTeryNano/tree/main/board/misteryshield20k) configuration Dualshock is supported via the internal ``spare J8`` pinheader. <br>
+> In a [MiSTeryShield20k](https://github.com/harbaum/MiSTeryNano/tree/main/board/misteryshield20k) configuration Dualshock is supported via the ``spare J8`` pinheader. <br>
 > See [MiSTeryShield20k DS2 Adapter / Cable](/board/misteryshield20k_ds2_adapter/misteryshield20k_ds2_adapter_cable.md) for further information. Thx [venice1200](https://github.com/venice1200) !<br>
 
 > [!NOTE]
-> TN20k: You have to select OSD "DS2 **#2** Joy" for a ``MiSTeryShield20k`` configuration.<br>
-> TN20k: You have to select OSD "DS2 **#1** Joy" if you use the ``Sipeed Joy to DIP`` adapter.<br>
-Both DS interface ports can be active at the same time meaning twin Dualshock support if the MiSTeryShield20k MIDI interface is not populated (Resistor R9 and IC U3 removed).  
+> TN20k: You have to select OSD "DS2 **#2** Joy" for a ``MiSTeryShield20k`` configuration.  
+> TN20k: You have to select OSD "DS2 **#1** Joy" if you use the ``Sipeed Joy to DIP`` adapter.  
 
 ## LED UI
 
@@ -191,7 +189,7 @@ Both DS interface ports can be active at the same time meaning twin Dualshock su
 
 ## Powering
 
-Prototype circuit with Keyboard can be powered by Tang USB-C connector from PC or a Power Supply Adapter.
+Circuit with Keyboard can be powered by Tang USB-C connector from PC or a Power Supply Adapter.
 
 ## Synthesis
 
