@@ -6,6 +6,7 @@ The Nano Apple IIe is a port of both [MiSTer](https://github.com/MiSTer-devel/Ap
 | ---        |        -   | -     |-|
 | [Tang Nano 20k](https://wiki.sipeed.com/nano20k)     | [GW2AR](https://www.gowinsemi.com/en/product/detail/38/)  |HDMI | |
 | [Tang Console 60K NEO](https://wiki.sipeed.com/hardware/en/tang/tang-console/mega-console.html)|[GW5AT-60](https://www.gowinsemi.com/en/product/detail/60/) | HDMI / LCD ||
+| [Tang Mega 60k NEO](https://wiki.sipeed.com/hardware/en/tang/tang-mega-60k/mega-60k.html)|[GW5AT-60](https://www.gowinsemi.com/en/product/detail/60/)| HDMI / LCD| |
 
 The project is still a work in progress.  
 Please report findings as issue.  
@@ -57,12 +58,17 @@ Planned features:
 * Load custom video ROM
 * SSC configuartion
 * FPGA companion build in WIFI modem via SSC
+* Tape load
 
 <img src="./.assets/apple2.png" alt="image" width="80%" height="auto">
 
 ## Tang Console 60k NEO
 
 See [Tang Console 60K NEO](TANG_CONSOLE_60K.md)
+
+## Tang Mega 60k NEO
+
+See [Tang Mega 60K NEO](TANG_MEGA_60K.md)
 
 ## Installation
 
@@ -173,11 +179,11 @@ Dualshock 2 Gamepad Stick as Joystick. OSD: **DS #1 Joy** or **DS #2 Joy**<br>
 
 ## LED UI
 
-| LED | function         |TN9K|TN20K|TP20K   |TP25K  |TM60K   |TM138k|Console60k|
-| --- |        -         |-   |-     |-      | -     | -      | -   |-|
-| 0   | unsupported |x   |x     |x      | x     | x      | x   |-|
-| 1   | unsupported |x   |x     |x      | x     | x      | x   |x|
-| 2   | unsupported |x   |x     |x      |  -    | -      | x   |-|
+| LED | function         |TN9K  |TN20K |TP20K  |TP25K  |TM60K   |TM138k|Console60k|
+| --- |        -         |-     |-     |-      | -     | -      | -    |-         |
+| 0   | unsupported      |-     |-     |-      | x     | x      | x    |-         |
+| 1   | FDD              |-     |-     |-      | x     | x      | x    |-         |
+| 2   | FDD              |-     |x     |-      | -     | -      | -    |x         |
 
 **Multicolor RGB LED**
 

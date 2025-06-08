@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------
---  Apple IIe Nano for Tang Console 60k / GW5AT-60B
+--  Nano Apple IIe for Tang Nano 20k
 --  2025 Stefan Voss
 --  based on the work of many others
 -------------------------------------------------------------------------
@@ -27,7 +27,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-entity apple2e_nano is
+entity nanoapple2 is
   port (
     clk_in      : in std_logic;
     s2_reset    : in std_logic; -- S2 button
@@ -42,40 +42,27 @@ entity apple2e_nano is
     -- SPI interface Sipeed M0S Dock external BL616 uC
     m0s         : inout std_logic_vector(4 downto 0);
     -- internal lcd
-    lcd_clk     : out std_logic; -- lcd clk
-    lcd_hs      : out std_logic; -- lcd horizontal synchronization
-    lcd_vs      : out std_logic; -- lcd vertical synchronization        
-    lcd_de      : out std_logic; -- lcd data enable     
-    lcd_bl      : out std_logic; -- lcd backlight control
-    lcd_r       : out std_logic_vector(7 downto 0);  -- lcd red
-    lcd_g       : out std_logic_vector(7 downto 0);  -- lcd green
-    lcd_b       : out std_logic_vector(7 downto 0);  -- lcd blue
-    -- audio
-    hp_bck      : out std_logic;
-    hp_ws       : out std_logic;
-    hp_din      : out std_logic;
-    pa_en       : out std_logic;
-    --
     tmds_clk_n  : out std_logic;
     tmds_clk_p  : out std_logic;
     tmds_d_n    : out std_logic_vector( 2 downto 0);
     tmds_d_p    : out std_logic_vector( 2 downto 0);
-    hpd_en      : out std_logic;
-    pwr_sav     : out std_logic;
     -- sd interface
     sd_clk      : out std_logic;
     sd_cmd      : inout std_logic;
     sd_dat      : inout std_logic_vector(3 downto 0);
-    -- MiSTer SDRAM module
-    O_sdram_clk     : out std_logic;
-    O_sdram_cs_n    : out std_logic; -- chip select
-    O_sdram_cas_n   : out std_logic;
-    O_sdram_ras_n   : out std_logic; -- row address select
-    O_sdram_wen_n   : out std_logic; -- write enable
-    IO_sdram_dq     : inout std_logic_vector(15 downto 0); -- 16 bit bidirectional data bus
-    O_sdram_addr    : out std_logic_vector(12 downto 0); -- 13 bit multiplexed address bus
-    O_sdram_ba      : out std_logic_vector(1 downto 0); -- two banks
-    O_sdram_dqm     : out std_logic_vector(1 downto 0); -- 16/2
+
+    ws2812       : out std_logic;
+    -- "Magic" port names that the gowin compiler connects to the on-chip SDRAM
+    O_sdram_clk  : out std_logic;
+    O_sdram_cke  : out std_logic;
+    O_sdram_cs_n : out std_logic;
+    O_sdram_cas_n: out std_logic;
+    O_sdram_ras_n: out std_logic;
+    O_sdram_wen_n: out std_logic;
+    IO_sdram_dq  : inout std_logic_vector(31 downto 0);
+    O_sdram_addr : out std_logic_vector(10 downto 0);
+    O_sdram_ba   : out std_logic_vector(1 downto 0);
+    O_sdram_dqm  : out std_logic_vector(3 downto 0);
     -- Gamepad Dualshock P0
     ds_clk          : out std_logic;
     ds_mosi         : out std_logic;
@@ -95,9 +82,9 @@ entity apple2e_nano is
     mspi_do       : inout std_logic
     );
 
-end apple2e_nano;
+end nanoapple2;
 
-architecture datapath of apple2e_nano is
+architecture datapath of nanoapple2 is
 
   signal clk_sys : std_logic;
   signal clk_core : std_logic;
@@ -394,14 +381,35 @@ begin
     end if;
   end process;
   
-pll_inst: entity work.Gowin_PLL_60k_pal
-port map (
-    lock    => pll_locked,
-    clkout0 => clk_pixel_x5,  -- 143M
-    clkout1 => open, -- 71M
-    clkout2 => clk_sys,  -- 28M
-    clkout3 => clk_core,  -- 14M
-    clkin   => clk_in -- 50Mhz
+pll_inst: entity work.Gowin_rPLL_tn20k
+    port map (
+        clkout => clk_pixel_x5,
+        lock   => pll_locked,
+        clkin  => clk_in
+    );
+
+div1_28mhz: CLKDIV
+generic map(
+    DIV_MODE => "5",
+    GSREN    => "false"
+)
+port map(
+    CLKOUT => clk_sys,
+    HCLKIN => clk_pixel_x5,
+    RESETN => pll_locked,
+    CALIB  => '0'
+);
+
+div2_14mhz: CLKDIV
+generic map(
+  DIV_MODE => "2",
+  GSREN    => "false"
+)
+port map(
+    CLKOUT => clk_core,
+    HCLKIN => clk_sys,
+    RESETN => pll_locked,
+    CALIB  => '0'
 );
 
 led_ws2812: entity work.ws2812
@@ -409,7 +417,7 @@ led_ws2812: entity work.ws2812
   (
    clk    => clk_sys,
    color  => ws2812_color,
-   data   => open  --ws2812
+   data   => ws2812
   );
 
 gamepad_p1: entity work.dualshock2
@@ -558,28 +566,29 @@ joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
 
   COLOR_LINE_CONTROL <= COLOR_LINE and not (system_monitor(1) or system_monitor(0));-- Color or B&W mode
   
-  -- sdram interface
-  O_sdram_clk <= not clk_sys;
+dram_inst: entity work.sdram port map(
+    SDRAM_CLK  => O_sdram_clk,
+    SDRAM_CKE  => O_sdram_cke,
+    SDRAM_DQ   => IO_sdram_dq,   -- 32 bit bidirectional data bus
+    SDRAM_A    => O_sdram_addr,  -- 11 bit multiplexed address bus
+    SD_DQM     => O_sdram_dqm,   -- two byte masks
+    SDRAM_BA   => O_sdram_ba,    -- two banks
+    SDRAM_nCS  => O_sdram_cs_n,  -- a single chip select
+    SDRAM_nWE  => O_sdram_wen_n, -- write enable
+    SDRAM_nRAS => O_sdram_ras_n, -- row address select
+    SDRAM_nCAS => O_sdram_cas_n, -- columns address select
+    -- cpu/chipset interface
+    init       => not pll_locked,-- init signal after FPGA config to initialize RAM
+    clk        => clk_sys,
+    clkref     => CLK_2M,
+    din        => ram_di,          -- data input from chipset/cpu
+    dout       => DO,     -- data output to chipset/cpu
+    addr       => ram_addr(21 downto 0) & '0',
+    oe         => not ram_we,            -- cpu/chipset requests read/wrie
+    we         => ram_we,            -- cpu/chipset requests write
+    aux        => aux
+  );
 
-  sdram_inst : entity work.sdram
-    port map( sd_data => IO_sdram_dq,
-              sd_addr => O_sdram_addr,
-              sd_dqm => O_sdram_dqm,
-              sd_cs => O_sdram_cs_n,
-              sd_ba => O_sdram_ba,
-              sd_we => O_sdram_wen_n,
-              sd_ras => O_sdram_ras_n,
-              sd_cas => O_sdram_cas_n,
-              clk => clk_sys,
-              clkref => CLK_2M,
-              init_n => pll_locked,
-              din => ram_di,
-              addr => ram_addr,
-              we => ram_we,
-              dout => DO,
-              aux => aux
-    );
-  
   -- Simulate power up on cold reset to go to the disk boot routine
   ram_we   <= we_ram when reset_cold = '0' else '1';
   ram_addr <= "000000000" & std_logic_vector(a_ram) when reset_cold = '0' else std_logic_vector(to_unsigned(1012,ram_addr'length)); -- $3F4
@@ -985,23 +994,21 @@ port map(
       tmds_d_n   => tmds_d_n,
       tmds_d_p   => tmds_d_p,
 
-      lcd_clk  => lcd_clk,
-      lcd_hs_n => lcd_hs,
-      lcd_vs_n => lcd_vs,
-      lcd_de   => lcd_de,
-      lcd_r    => lcd_r,
-      lcd_g    => lcd_g,
-      lcd_b    => lcd_b,
-      lcd_bl   => lcd_bl,
+      lcd_clk  => open,
+      lcd_hs_n => open,
+      lcd_vs_n => open,
+      lcd_de   => open,
+      lcd_r    => open,
+      lcd_g    => open,
+      lcd_b    => open,
+      lcd_bl   => open,
 
-      hp_bck   => hp_bck,
-      hp_ws    => hp_ws,
-      hp_din   => hp_din,
-      pa_en    => pa_en
+      hp_bck   => open,
+      hp_ws    => open,
+      hp_din   => open,
+      pa_en    => open
       );
 
-hpd_en <= '1';
-pwr_sav <= '1';
 
 spi_io_din  <= m0s(1);
 spi_io_ss   <= m0s(2);
@@ -1110,7 +1117,7 @@ module_inst: entity work.sysctrl
   int_in              => unsigned'(x"0" & sdc_int & '0' & hid_int & '0'),
   int_ack             => int_ack,
 
-  buttons             => unsigned'(not s2_reset & not user), -- S0 and S1 buttons on Tang Nano 20k
+  buttons             => unsigned'(s2_reset & user), -- S0 and S1 buttons on Tang Nano 20k
   leds                => open,-- two leds can be controlled from the MCU
   color               => ws2812_color -- a 24bit color to e.g. be used to drive the ws2812
 );

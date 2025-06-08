@@ -68,11 +68,11 @@
         <File path="src/spram.vhd" type="file.vhdl" enable="1"/>
         <File path="src/ssc.vhd" type="file.vhdl" enable="1"/>
         <File path="src/ssc_rom.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/console60k/apple2e_nano.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/tang/tm60k/nanoapple2.vhd" type="file.vhdl" enable="1"/>
         <File path="src/timing_generator.vhd" type="file.vhdl" enable="1"/>
         <File path="src/tv_controller.vhd" type="file.vhdl" enable="1"/>
         <File path="src/video_generator.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/console60k/apple2nano_tc60k.cst" type="file.cst" enable="1"/>
-        <File path="src/tang/console60k/apple2nano_tc60k.sdc" type="file.sdc" enable="1"/>
+        <File path="src/tang/tm60k/nanoapple2_tm60k.cst" type="file.cst" enable="1"/>
+        <File path="src/tang/tm60k/nanoapple2_tm60k.sdc" type="file.sdc" enable="1"/>
     </FileList>
 </Project>

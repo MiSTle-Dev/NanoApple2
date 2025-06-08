@@ -10,7 +10,7 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 
-entity Gowin_PLL_60k_pal is
+entity Gowin_PLL_60k_ntsc is
     port (
         lock: out std_logic;
         clkout0: out std_logic;
@@ -19,9 +19,9 @@ entity Gowin_PLL_60k_pal is
         clkout3: out std_logic;
         clkin: in std_logic
     );
-end Gowin_PLL_60k_pal;
+end Gowin_PLL_60k_ntsc;
 
-architecture Behavioral of Gowin_PLL_60k_pal is
+architecture Behavioral of Gowin_PLL_60k_ntsc is
 
     signal clkout4: std_logic;
     signal clkout5: std_logic;
@@ -267,4 +267,4 @@ begin
             MDWDI => MDWDI_i
         );
 
-end Behavioral; --Gowin_PLL_60k_pal
+end Behavioral;

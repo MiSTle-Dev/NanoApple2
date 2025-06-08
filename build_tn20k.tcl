@@ -2,6 +2,7 @@ set_device GW2AR-LV18QN88C8/I7 -name GW2AR-18C
 
 add_file mockingboard/YM2149.sv
 add_file src/dualshock2.v
+add_file src/floppy_track.sv
 add_file src/gen_uart.v
 add_file src/gowin_dpb/gowin_dpb_trkbuf.v
 add_file src/gowin_dpb/sector_dpram.v
@@ -53,18 +54,18 @@ add_file src/keyboard.vhd
 add_file src/spram.vhd
 add_file src/ssc.vhd
 add_file src/ssc_rom.vhd
-add_file src/tang/nano20k/apple2e_nano.vhd
+add_file src/tang/nano20k/nanoapple2.vhd
 add_file src/timing_generator.vhd
 add_file src/tv_controller.vhd
 add_file src/video_generator.vhd
-add_file src/tang/nano20k/apple2e_nano.cst
-add_file src/tang/nano20k/apple2e_nano.sdc
+add_file src/tang/nano20k/nanoapple2.cst
+add_file src/tang/nano20k/nanoapple2.sdc
 
 set_option -synthesis_tool gowinsynthesis
-set_option -output_base_name apple2e_nano_tn20k
+set_option -output_base_name nanoapple2_tn20k
 set_option -verilog_std sysv2017
 set_option -vhdl_std vhd2008
-set_option -top_module apple2e_nano
+set_option -top_module nanoapple2
 set_option -use_mspi_as_gpio 1
 set_option -use_sspi_as_gpio 1
 set_option -print_all_synthesis_warning 1

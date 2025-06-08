@@ -57,11 +57,11 @@
         <File path="src/spram.vhd" type="file.vhdl" enable="1"/>
         <File path="src/ssc.vhd" type="file.vhdl" enable="1"/>
         <File path="src/ssc_rom.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/nano20k/apple2e_nano.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/tang/nano20k/nanoapple2.vhd" type="file.vhdl" enable="1"/>
         <File path="src/timing_generator.vhd" type="file.vhdl" enable="1"/>
         <File path="src/tv_controller.vhd" type="file.vhdl" enable="1"/>
         <File path="src/video_generator.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/nano20k/apple2e_nano.cst" type="file.cst" enable="1"/>
-        <File path="src/tang/nano20k/apple2e_nano.sdc" type="file.sdc" enable="1"/>
+        <File path="src/tang/nano20k/nanoapple2.cst" type="file.cst" enable="1"/>
+        <File path="src/tang/nano20k/nanoapple2.sdc" type="file.sdc" enable="1"/>
     </FileList>
 </Project>

@@ -2,6 +2,7 @@ set_device GW5AT-LV60PG484AC1/I0 -device_version B
 
 add_file mockingboard/YM2149.sv
 add_file src/dualshock2.v
+add_file src/floppy_track.sv
 add_file src/gen_uart.v
 add_file src/gowin_dpb/gowin_dpb_trkbuf.v
 add_file src/gowin_dpb/sector_dpram.v
@@ -55,16 +56,16 @@ add_file src/ssc_rom.vhd
 add_file src/timing_generator.vhd
 add_file src/tv_controller.vhd
 add_file src/video_generator.vhd
-add_file src/tang/console60k/apple2e_nano.vhd
-add_file src/tang/console60k/apple2nano_tc60k.cst
-add_file src/tang/console60k/apple2nano_tc60k.sdc
+add_file src/tang/console60k/nanoapple2.vhd
+add_file src/tang/console60k/nanoapple2_tc60k.cst
+add_file src/tang/console60k/nanoapple2_tc60k.sdc
 add_file src/gowin_pll/gowin_pll_60k_ntsc.vhd
 
 set_option -synthesis_tool gowinsynthesis
-set_option -output_base_name apple2e_nano_tc60k
+set_option -output_base_name nanoapple2_tc60k
 set_option -verilog_std sysv2017
 set_option -vhdl_std vhd2008
-set_option -top_module apple2e_nano
+set_option -top_module nanoapple2e
 set_option -use_mspi_as_gpio 1
 set_option -use_sspi_as_gpio 1
 set_option -use_done_as_gpio 1
