@@ -53,12 +53,13 @@ Features:
 
 Planned features:
 
-* Tang Mega 138k Pro, Mega 60k, Primer 25k support
+* Tang Mega 138k Pro, Primer 25k support
 * Mouse support
 * Load custom video ROM
 * SSC configuartion
 * FPGA companion build in WIFI modem via SSC
 * Tape load
+* Option for mixed mode text color artifacts
 
 <img src="./.assets/apple2.png" alt="image" width="80%" height="auto">
 
