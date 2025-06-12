@@ -42,23 +42,24 @@ Features:
 * Disk loading via OSD. supported formats: .NIB
 * HDD loading via OSD. supported formats: .HDV (raw ProDOS partition images, 32MB)
 * Selectable 6502 or 65C02 CPU
-* Joystick support
+* Joystick support (analog proportional)
+* Mouse support
 * Scanlines
 * Monitor type: Color, amber, green and black&white
 * Selection of color palette (NTSC //e, Apple IIgs, AppleWin, Custom)
 * Language card in slot 0
-* Super Serial Card in slot 2
+* Super Serial Card (SSC) in slot 2
 * 64K base + 64K auxilary RAM with 80 column and double hi-res support
 * Mockingboard model A (two AY-3-8913 chips for six audio channels) in slot 4
+* Video ROM Switch (US /UK)
+* Loadable 8K custom Video ROM
+* SSC configuartion
+* Tape loading via the UART RX pin
 
 Planned features:
 
 * Tang Mega 138k Pro, Primer 25k support
-* Mouse support
-* Load custom video ROM
-* SSC configuartion
 * FPGA companion build in WIFI modem via SSC
-* Tape load
 * Option for mixed mode text color artifacts
 
 <img src="./.assets/apple2.png" alt="image" width="80%" height="auto">
@@ -90,12 +91,12 @@ The installation on the Tang Nano 20k board can be done using a Linux PC or a Wi
 
 ## Apple II slot assignments
 
-* Slot 0 - language card
+* Slot 0 - language card (memory expansion)
 * Slot 1 - not populated
-* Slot 2 - Super Serial Card
+* Slot 2 - Super Serial Card (SSC)
 * Slot 3 - 80 col + 64K RAM expansion (//e)
 * Slot 4 - Mockinboard model A (six audio channels)
-* Slot 5 - upcoming Mouse support
+* Slot 5 - Mouse Interface
 * Slot 6 - Disk Drive controller
 * Slot 7 - Hard Disk Drive controller
 
@@ -154,20 +155,22 @@ invoke by F12 keypress
 * Scanlines effect %
 * Monitor type
 * Color Palette
-* SSC, HDD, MB, Mouse disable/ enable
+* SSC, HDD, MB, MOUSE disable/ enable
 * CPU type
 * HID device selection for Joystick Port
-* Invert X/Y
+* Invert Joystick X/Y
+* Video ROM switch
+* SSC Baudrate, Parity, Mode
 
 ## Gamecontrol support
 
 ![controller](\.assets/controller-layout.png)  
 
-USB Joystick(s) or Gamepad(s) Stick as Joystick (no DPAD). OSD: **USB #1 Joy** or **USB #2 Joy**  
+USB Joystick(s) or Gamepad(s) Stick as Joystick (no DPAD). OSD: **USB #1** or **USB #2**  
 ```Button A and B``` Buttons as Trigger:  
 
 or  
-Dualshock 2 Gamepad Stick as Joystick. OSD: **DS #1 Joy** or **DS #2 Joy**<br>
+Dualshock 2 Gamepad Stick as Joystick. OSD: **DS #1** or **DS #2**<br>
 <br>```square and cross``` Buttons as Trigger:<br>
 
 > [!IMPORTANT]

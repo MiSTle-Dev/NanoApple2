@@ -105,13 +105,12 @@ videorom: entity work.Gowin_SDPB_8k port map (
         unsigned(dout) => video_rom_out,
         clkb => CLK_14M,
         ceb => '1',
-        resetb => '0',
+        reset => '0',
         oce => '1',
         ada => ioctl_addr(12 downto 0),
         din => ioctl_data,
         clka => ioctl_clk,
-        cea => ioctl_wr,
-        reseta => '0'
+        cea => ioctl_wr
     );
 
   LS166 : process (CLK_14M)

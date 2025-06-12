@@ -42,35 +42,6 @@ end applemouse;
 
 architecture rtl of applemouse is
 
-  component jtframe_6805mcu
-  generic
-  (
-    ROMW   : integer := 11
-  );
-  port
-  (
-    rst    : in  std_logic;
-    clk    : in  std_logic;
-    cen    : in  std_logic;
-    wr     : out std_logic;
-    addr   : out std_logic_vector(12 downto 0);
-    dout   : out std_logic_vector(7 downto 0);
-    irq    : in  std_logic;
-    timer  : in  std_logic;
-
-    pa_in  : in  std_logic_vector(7 downto 0);
-    pa_out : out std_logic_vector(7 downto 0);
-    pb_in  : in  std_logic_vector(7 downto 0);
-    pb_out : out std_logic_vector(7 downto 0);
-    pc_in  : in  std_logic_vector(3 downto 0);
-    pc_out : out std_logic_vector(3 downto 0);
-
-    rom_addr : out std_logic_vector(ROMW-1 downto 0);
-    rom_data : in  std_logic_vector(7 downto 0);
-    rom_cs   : out std_logic
-  );
-  end component jtframe_6805mcu;
-
   signal rom_addr : std_logic_vector(10 downto 0);
   signal rom_dout : std_logic_vector(7 downto 0);
 
@@ -199,7 +170,7 @@ begin
     end if;
   end process;
 
-  mcu : jtframe_6805mcu port map (
+  mcu : entity work.jtframe_6805mcu port map (
     rst      => RESET,
     clk      => CLK_14M,
     cen      => clk_2en,
@@ -221,6 +192,27 @@ begin
     rom_cs   => open
   );
 
+--  mcu : entity work.uc68hc05 port map (
+--    reset       => RESET,
+--    clk30       => CLK_14M,
+--    irq         => '0',
+--    porta_in    => mcu_pa_in,
+--    porta_out   => mcu_pa_out,
+--    portb_in    => mcu_pb_in,
+--    portb_out   => mcu_pb_out,
+--    portc_in    => x"0" & mcu_pc_in,
+--    portc_out(3 downto 0) => mcu_pc_out,
+--    portd_in    => x"00",
+--    ddra        => open,
+--    ddrb        => open,
+--    ddrc        => open,
+--
+--    memory_addr(10 downto 0) => mcu_rom_addr,
+--    memory_readout => mcu_rom_dout,
+--    quirk_force_mode_fault =>'0',
+--    tcap        => '0'
+--  );
+
   mcu_pa_in <= pia_pa_out;
   pia_pa_in <= mcu_pa_out;
 
@@ -233,35 +225,16 @@ begin
 
   -- 341-0270-C
   rom_addr <= pia_pb_out(3 downto 1) & std_logic_vector(A(7 downto 0));
---  rom : entity work.applemouse_rom port map (
---    addr => rom_addr,
---    clk  => CLK_14M,
---    data => rom_dout);
 
-rom: entity work.Gowin_pROM_mouse
-    port map (
-        dout => rom_dout,
-        clk => CLK_14M,
-        oce => '1',
-        ce => '1',
-        reset => '0',
-        ad => rom_addr
-    );
-
+  rom : entity work.applemouse_rom port map (
+    addr => rom_addr,
+    clk  => CLK_14M,
+    data => rom_dout);
 
   -- 341-0269
---  mcu_rom : entity work.applemouse_mcu_rom port map (
---    addr => mcu_rom_addr,
---    clk  => CLK_14M,
---    data => mcu_rom_dout);
+ mcu_rom : entity work.applemouse_mcu_rom port map (
+    addr => mcu_rom_addr,
+    clk  => CLK_14M,
+    data => mcu_rom_dout);
 
-mcu_rom: entity work.Gowin_pROM_mousemcu
-    port map (
-        dout => mcu_rom_dout,
-        clk => CLK_14M,
-        oce => '1',
-        ce => '1',
-        reset => '0',
-        ad => mcu_rom_addr
-    );
 end rtl;

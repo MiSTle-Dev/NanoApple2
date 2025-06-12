@@ -24,6 +24,7 @@ entity ssc is
     D_OUT          : out unsigned( 7 downto 0); -- To 6502
     RNW            : in  std_logic;
     OE             : out std_logic;
+    IRQ_N          : out std_logic;
 
     SW1            : in  std_logic_vector(6 downto 1);
     SW2            : in  std_logic_vector(5 downto 1);
@@ -90,8 +91,24 @@ begin
   sw1_cs  <= DEVICE_SELECT and not A(3) and not A(1);
   sw2_cs  <= DEVICE_SELECT and not A(3) and not A(0);
 
-  D_OUT <= SW1(1)&SW1(2)&SW1(3)&SW1(4)&"11"&SW1(5)&SW1(6) when sw1_cs = '1' else
-           SW2(1)&'1'&SW2(2)&'1'&SW2(3)&SW2(4)&SW2(5)&UART_CTS when sw2_cs = '1' else
+--  Bit-> B7  B6  B5  B4  B3  B2  B1  B0
+-- DIPSW1 S1  S2  S3  S4  Z   Z   S5  S6   8'b11101100:
+-- 1110 9600 baud
+-- '1' fix
+-- '1' fix
+-- 00 firmware mode 
+
+-- DIPSW2 S1  Z   S2  Z   S3  S4  S5  CTS  {7'b0101000, UART_CTS}:
+-- rs232 CTS signal
+-- irq
+-- (5) add linefeed
+-- (4) no parity
+-- (3) no parity
+-- (2) 8bit dataformat
+-- '1' fix
+-- (1) 1bit stopbit
+  D_OUT <= SW1(1) & SW1(2) & SW1(3) & SW1(4) &   '1'  &  '1'   & SW1(5) &   SW1(6) when sw1_cs = '1' else
+           SW2(1) &  '1'   & SW2(2) &   '1'  & SW2(3) & SW2(4) & SW2(5) & UART_CTS when sw2_cs = '1' else
            unsigned(uart_dout) when uart_cs = '1' else
            rom_dout;
   OE <= (IO_STROBE and rom_active) or IO_SELECT or DEVICE_SELECT;
@@ -115,7 +132,7 @@ begin
     rnw    => RNW,
     cs     => uart_cs,
     rs     => std_logic_vector( A(1 downto 0) ),
-    irq_n  => open,
+    irq_n  => IRQ_N,
     cts_n  => UART_CTS,
     dcd_n  => UART_DCD,
     dsr_n  => UART_DSR,

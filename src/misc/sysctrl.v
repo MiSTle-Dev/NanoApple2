@@ -36,11 +36,11 @@ module sysctrl (
 
   // values that can be configured by the user
   output reg [1:0]  system_monitor,
-  output reg	      system_cpu,
+  output reg        system_cpu,
   output reg [1:0]  system_reset,
   output reg [1:0]  system_scanlines,
   output reg [1:0]  system_volume,
-  output reg	      system_wide_screen,
+  output reg        system_wide_screen,
   output reg [1:0]  system_floppy_wprot,
   output reg [2:0]  system_port_1,
   output reg [1:0]  system_palette,
@@ -50,10 +50,14 @@ module sysctrl (
   output reg        system_mouse,
   output reg        system_hdd,
   output reg        system_videorom,
-  output reg        system_joyswap,
+  output reg        system_databits,
   output reg        system_analogxy,
   output reg        system_hdd_prot,
-  output reg [1:0]  system_uart
+  output reg [1:0]  system_uart,
+  output reg [1:0]  system_parity,
+  output reg [3:0]  system_baudrate,
+  output reg        system_sscirq,
+  output reg        system_lfcr
 );
 
 reg [3:0] state;
@@ -125,10 +129,14 @@ always @(posedge clk) begin
       system_mouse <= 1'b1;
       system_hdd <= 1'b1;
       system_videorom <= 1'b0;
-      system_joyswap <= 1'b0;
       system_analogxy <= 1'b0;
       system_uart <= 2'b00;
       system_hdd_prot <= 1'b1;
+      system_databits <= 1'b0;
+      system_parity <= 2'b00;
+      system_baudrate <= 4'd14;
+      system_sscirq <= 1'b0;
+      system_lfcr <= 1'b0;
    end else begin // if (reset)
       //  bring button state into local clock domain
       buttonsD <= buttons;
@@ -163,16 +171,16 @@ always @(posedge clk) begin
            data_out <= 8'h00;
         end else begin
             if(state != 4'd15) state <= state + 4'd1;
-	    
+    
             // CMD 0: status data
             if(command == 8'd0) begin
                 // return some pattern that would not appear randomly
-	        // on e.g. an unprogrammed device
+            // on e.g. an unprogrammed device
                 if(state == 4'd0) data_out <= 8'h5c;
                 if(state == 4'd1) data_out <= 8'h42;
                 if(state == 4'd2) data_out <= 8'h00;   // old core id 3 = VIC20 
             end
-	   
+   
             // CMD 1: there are two MCU controlled LEDs
             if(command == 8'd1) begin
                 if(state == 4'd0) leds <= data_in[1:0];
@@ -229,13 +237,21 @@ always @(posedge clk) begin
                     // 
                     if(id == "G") system_videorom <= data_in[0];
                     // 
-                    if(id == "V") system_joyswap <= data_in[0];
+                    if(id == "V") system_databits <= data_in[0];
                     // 
                     if(id == "I") system_analogxy <= data_in[0];
                     // RS232 UART port
                     if(id == "*") system_uart <= data_in[1:0];
                     // 
                     if(id == "J") system_hdd_prot <= data_in[0];
+                    //
+                    if(id == "!") system_parity <= data_in[1:0];
+                    //
+                    if(id == "&") system_databits <= data_in[0];
+                    //
+                    if(id == "=") system_baudrate <= data_in[3:0];
+                    //
+                    if(id == "?") system_lfcr <= data_in[0];
                 end
             end
 
