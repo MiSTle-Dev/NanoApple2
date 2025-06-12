@@ -23,14 +23,25 @@ reg [11:0] jsr_ua, jsr_ret, uaddr;
 // wire       md_shift;
 // wire       stop;
 
-reg  [38:0] ucode_rom[0:2**12-1];
+//reg  [38:0] ucode_rom[0:2**12-1];
+wire [39:0] dout;
 wire [38:0] ucode_data;
 
-initial begin
-    $readmemb("6805.uc",ucode_rom);
-end
+assign ucode_data = dout[38:0];
 
-assign ucode_data = ucode_rom[uaddr];
+//initial begin
+//    $readmemb("6805.uc",ucode_rom);
+//end
+//assign ucode_data = ucode_rom[uaddr];
+
+Gowin_pROM_uc ucode(
+    .dout(dout),
+    .clk(clk),
+    .oce(1'b1),
+    .ce(1'b1), 
+    .reset(1'b0),
+    .ad(uaddr)
+);
 
 assign branch     = ucode_data[ 4+:1];
 assign brlatch    = ucode_data[ 5+:1];

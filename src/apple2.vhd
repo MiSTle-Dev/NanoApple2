@@ -57,6 +57,7 @@ entity apple2 is
     ioctl_index    : in  std_logic_vector(7 downto 0);
     ioctl_download : in  std_logic;
     ioctl_wr       : in  std_logic;
+    ioctl_clk      : in  std_logic;
 
     speaker        : out std_logic              -- One-bit speaker output
     );
@@ -436,15 +437,16 @@ begin
     SEGB       => SEGB,
     SEGC       => SEGC,
     ALTCHAR    => ALTCHAR,
- --   ROMSWITCH  => ROMSWITCH,
+    ROMSWITCH  => ROMSWITCH,
     WNDW_N     => WNDW_N,
     DL         => VIDEO_DL,
     LDPS_N     => LDPS_N,
     FLASH_CLK  => FLASH_CLK,
 
---    ioctl_addr => ioctl_addr,
---    ioctl_data => ioctl_data,
---    ioctl_wr => video_rom_select,
+    ioctl_addr => ioctl_addr,
+    ioctl_data => ioctl_data,
+    ioctl_wr   => video_rom_select,
+    ioctl_clk  => ioctl_clk,
 	 
     VIDEO      => VIDEO);
 
@@ -461,9 +463,6 @@ begin
       PHASE_ZERO_D <= PHASE_ZERO;
     end if;
   end process cpu_enable;
-
-
-
 
   cpu6502 : entity work.T65
     port map (

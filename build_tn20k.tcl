@@ -1,6 +1,16 @@
 set_device GW2AR-LV18QN88C8/I7 -name GW2AR-18C
 
 add_file mockingboard/YM2149.sv
+add_file mouse/jt6805/jt6805.v
+add_file mouse/jt6805/jt6805_alu.v
+add_file mouse/jt6805/jt6805_ctrl.v
+add_file mouse/jt6805/jt6805_regs.v
+add_file mouse/jt6805/jtframe_6805mcu.v
+add_file mouse/applemouse.vhd
+add_file mouse/applemouse_mcu_rom.vhd
+add_file mouse/applemouse_rom.vhd
+add_file mouse/pia6821.vhd
+add_file src/gowin_prom/gowin_prom_uc.v
 add_file src/dualshock2.v
 add_file src/floppy_track.sv
 add_file src/gen_uart.v
@@ -20,7 +30,7 @@ add_file src/loader_sd_card.sv
 add_file src/misc/hid.v
 add_file src/misc/mcu_spi.v
 add_file src/misc/osd_u8g2.v
-add_file src/misc/scandoubler.v>
+add_file src/misc/scandoubler.v
 add_file src/misc/sd_card.v
 add_file src/misc/sd_rw.v
 add_file src/misc/sdcmd_ctrl.v
@@ -44,10 +54,8 @@ add_file src/drive_ii.vhd
 add_file src/gowin_dpb/gowin_dpb_track_buffer_b.vhd
 add_file src/gowin_prom/gowin_prom_apple2.vhd
 add_file src/gowin_prom/gowin_prom_key.vhd
-add_file src/gowin_prom/gowin_prom_mouse.vhd
-add_file src/gowin_prom/gowin_prom_mousemcu.vhd
-add_file src/gowin_prom/gowin_prom_video.vhd
 add_file src/gowin_rpll/gowin_rpll_tn20k.vhd
+add_file src/gowin_sp/gowin_sp_128b.v
 add_file src/hdd.vhd
 add_file src/hdd_rom.vhd
 add_file src/keyboard.vhd
@@ -60,13 +68,14 @@ add_file src/tv_controller.vhd
 add_file src/video_generator.vhd
 add_file src/tang/nano20k/nanoapple2.cst
 add_file src/tang/nano20k/nanoapple2.sdc
+add_file src/gowin_sdpb/gowin_sdpb_8k.vhd
 
 set_option -synthesis_tool gowinsynthesis
 set_option -output_base_name nanoapple2_tn20k
 set_option -verilog_std sysv2017
 set_option -vhdl_std vhd2008
 set_option -top_module nanoapple2
-set_option -use_mspi_as_gpio 1
+set_option -use_mspi_as_gpio 0
 set_option -use_sspi_as_gpio 1
 set_option -print_all_synthesis_warning 1
 set_option -rw_check_on_ram 0

@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------
---  Nano Apple IIe for Tang Console 60k / GW5AT-60B
+--  Nano Apple IIe for Tang Mega 60k / GW5AT-60B
 --  2025 Stefan Voss
 --  based on the work of many others
 -------------------------------------------------------------------------
@@ -33,7 +33,7 @@ entity nanoapple2 is
     s2_reset    : in std_logic; -- S2 button
     user        : in std_logic; -- S1 button
     leds_n      : out std_logic_vector(2 downto 0);
-    -- USB-C BL616 UART
+    -- onboard USB-C Tang BL616 UART
     uart_rx     : in std_logic;
     uart_tx     : out std_logic;
     -- external hw pin UART
@@ -66,7 +66,7 @@ entity nanoapple2 is
     sd_clk      : out std_logic;
     sd_cmd      : inout std_logic;
     sd_dat      : inout std_logic_vector(3 downto 0);
-
+    -- multicolor LED
     ws2812       : out std_logic;
     -- MiSTer SDRAM module
     O_sdram_clk     : out std_logic;
@@ -87,14 +87,7 @@ entity nanoapple2 is
     ds2_clk       : out std_logic;
     ds2_mosi      : out std_logic;
     ds2_miso      : in std_logic;
-    ds2_cs        : out std_logic;
-    -- spi flash interface
-    mspi_cs       : out std_logic;
-    mspi_clk      : out std_logic;
-    mspi_di       : inout std_logic;
-    mspi_hold     : inout std_logic;
-    mspi_wp       : inout std_logic;
-    mspi_do       : inout std_logic
+    ds2_cs        : out std_logic
     );
 
 end nanoapple2;
@@ -119,9 +112,10 @@ architecture datapath of nanoapple2 is
   signal DO : std_logic_vector(15 downto 0);
   signal aux : std_logic;
   signal cpu_we : std_logic;
-  signal psg_irq_n, psg_nmi_n : std_logic := '1';
+  signal psg_irq_n : std_logic := '1';
   signal mouse_irq_n : std_logic :='1';
-
+  signal ssc_irq_n : std_logic := '1';
+  signal irq_n : std_logic;
   signal we_ram : std_logic;
   signal VIDEO, HBL, VBL : std_logic;
   signal COLOR_LINE : std_logic;
@@ -170,6 +164,11 @@ architecture datapath of nanoapple2 is
   signal joy_an     : std_logic_vector(15 downto 0);
   signal mouse_strobe : std_logic;
   signal mouse_flags  : std_logic_vector(7 downto 0);
+  signal mouse_x_pos : signed(8 downto 0);
+  signal mouse_y_pos : signed(8 downto 0);
+  signal mouse_x_joy : signed(10 downto 0);
+  signal mouse_y_joy : signed(10 downto 0);
+  signal mouse_btns  : std_logic_vector(1 downto 0);
   signal audio_sp    : unsigned(9 downto 0);
   signal psg_audio_l : unsigned(9 downto 0);
   signal psg_audio_r : unsigned(9 downto 0);
@@ -182,7 +181,8 @@ architecture datapath of nanoapple2 is
   signal SD_LBA1:  std_logic_vector(31 downto 0);
   signal SD_LBA2:  std_logic_vector(31 downto 0);
   signal SD_LBA3:  std_logic_vector(31 downto 0);
-  
+  signal SD_LBA4:  std_logic_vector(31 downto 0);
+
   -- data from io controller to sd card emulation
   signal sd_data_in: std_logic_vector(7 downto 0);
   signal sd_data_out: std_logic_vector(7 downto 0);
@@ -191,15 +191,6 @@ architecture datapath of nanoapple2 is
   signal SD_DATA_IN1: std_logic_vector(7 downto 0);
   signal SD_DATA_IN2: std_logic_vector(7 downto 0);
   signal SD_DATA_IN3: std_logic_vector(7 downto 0);
-
-  -- data io
-  signal ioctl_download : std_logic;
-  signal ioctl_upload   : std_logic;
-  signal ioctl_index    : std_logic_vector(7 downto 0);
-  signal ioctl_wr       : std_logic;
-  signal ioctl_addr     : std_logic_vector(26 downto 0);
-  signal ioctl_dout     : std_logic_vector(7 downto 0);
-  signal ioctl_din      : std_logic_vector(7 downto 0);
 
   signal pll_locked : std_logic;
   signal joyx       : std_logic;
@@ -212,13 +203,11 @@ architecture datapath of nanoapple2 is
   signal joyUsb2      : std_logic_vector(7 downto 0);
   signal joyDS2_p1    : std_logic_vector(7 downto 0);
   signal joyDS2_p2    : std_logic_vector(7 downto 0);
-  signal port_1_sel  : std_logic_vector(2 downto 0);
+  signal joyMouse     : std_logic_vector(7 downto 0);
+  signal port_1_sel   : std_logic_vector(2 downto 0);
 -- mouse / paddle
-signal posx        : std_logic_vector(7 downto 0);
-signal posy        : std_logic_vector(7 downto 0);
-signal mouse_x_pos : signed(10 downto 0);
-signal mouse_y_pos : signed(10 downto 0);
-
+signal posx            : std_logic_vector(7 downto 0);
+signal posy            : std_logic_vector(7 downto 0);
 signal joystick0ax     : std_logic_vector(7 downto 0);
 signal joystick0ay     : std_logic_vector(7 downto 0);
 signal joystick1ax     : std_logic_vector(7 downto 0);
@@ -230,13 +219,20 @@ signal joystick1_x_pos : std_logic_vector(7 downto 0);
 signal joystick1_y_pos : std_logic_vector(7 downto 0);
 signal extra_button0   : std_logic_vector(7 downto 0);
 signal extra_button1   : std_logic_vector(7 downto 0);
-
 signal joystick0       : std_logic_vector(7 downto 0);
 signal joystick1       : std_logic_vector(7 downto 0);
-signal mouse_btns     : std_logic_vector(1 downto 0);
-signal mouse_x        : signed(7 downto 0);
-signal mouse_y        : signed(7 downto 0);
---signal mouse_strobe   : std_logic;
+
+signal mouse_btnsC     : std_logic_vector(1 downto 0);
+signal mouse_btnsD     : std_logic_vector(1 downto 0);
+signal mouse_xC        : signed(7 downto 0);
+signal mouse_yC        : signed(7 downto 0);
+signal mouse_xD        : signed(7 downto 0);
+signal mouse_yD        : signed(7 downto 0);
+signal mouse_x         : signed(7 downto 0);
+signal mouse_y         : signed(7 downto 0);
+signal mouse_strobeC   : std_logic;
+signal mouse_strobeD   : std_logic;
+
 signal paddle_1        : std_logic_vector(7 downto 0);
 signal paddle_2        : std_logic_vector(7 downto 0);
 signal paddle_3        : std_logic_vector(7 downto 0);
@@ -269,7 +265,6 @@ signal key_left2       : std_logic;
 signal key_right2      : std_logic;
 signal key_start2      : std_logic;
 signal key_select2     : std_logic;
-
 signal sdc_int        : std_logic :='0';
 signal sdc_iack       : std_logic;
 signal int_ack        : std_logic_vector(7 downto 0);
@@ -308,18 +303,18 @@ signal sd_wr_data     : std_logic_vector(7 downto 0);
 signal disk_chg_trg   : std_logic;
 signal UART_CTS       : std_logic;
 signal UART_RTS        : std_logic;
-signal sector          : unsigned(15 downto 0);
-signal hdd_mounted     : std_logic := '0';
-signal hdd_read        : std_logic;
-signal hdd_write       : std_logic;
-signal hdd_protect     : std_logic;
-signal cpu_wait_hdd    : std_logic := '0';
-signal cpu_wait_hddD   : std_logic := '0';
-signal cpu_wait_hddD2  : std_logic := '0';
-signal hdd_read_pending : std_logic := '0';
-signal hdd_write_pending: std_logic := '0';
-signal state           : std_logic := '0';
-signal old_ack         : std_logic := '0';
+signal sector             : unsigned(15 downto 0);
+signal hdd_mounted        : std_logic := '0';
+signal hdd_read           : std_logic;
+signal hdd_write          : std_logic;
+signal hdd_protect        : std_logic;
+signal cpu_wait_hdd       : std_logic := '0';
+signal cpu_wait_hddD      : std_logic := '0';
+signal cpu_wait_hddD2     : std_logic := '0';
+signal hdd_read_pending   : std_logic := '0';
+signal hdd_write_pending  : std_logic := '0';
+signal state              : std_logic := '0';
+signal old_ack            : std_logic := '0';
 signal hdd_readD2, hdd_readD  : std_logic;
 signal hdd_writeD2, hdd_writeD  : std_logic;
 signal system_floppy_wprot: std_logic_vector(1 downto 0);
@@ -332,7 +327,6 @@ signal system_mb          : std_logic;
 signal system_mouse       : std_logic;
 signal system_hdd         : std_logic;
 signal system_videorom    : std_logic;
-signal system_joyswap     : std_logic;
 signal system_analogxy    : std_logic;
 signal system_hdd_prot    : std_logic;
 signal soft_reset         : std_logic;
@@ -341,6 +335,22 @@ signal reset_warm         : std_logic;
 signal dd_reset           : std_logic := '1';
 signal uart_rx_muxed      : std_logic;
 signal system_uart        : std_logic_vector(1 downto 0);
+signal ssc_sw1            : std_logic_vector(6 downto 1) := "111111";
+signal ssc_sw2            : std_logic_vector(5 downto 1) := "11111";
+signal system_databits    : std_logic;
+signal system_parity      : std_logic_vector(1 downto 0);
+signal system_baudrate    : std_logic_vector(3 downto 0);
+signal system_sscirq      : std_logic;
+signal system_lfcr        : std_logic;
+signal loader_busy        : std_logic;
+signal load_rom           : std_logic;
+signal ioctl_download     : std_logic := '0';
+signal ioctl_load_addr    : std_logic_vector(22 downto 0);
+signal ioctl_wr           : std_logic;
+signal ioctl_data         : std_logic_vector(7 downto 0);
+signal ioctl_addr         : std_logic_vector(22 downto 0);
+signal ioctl_wait         : std_logic := '0';
+signal pause              : std_logic;
 
 component DCS
 generic (
@@ -373,15 +383,30 @@ end component;
 begin
 
   leds_n(1 downto 0) <= "11";
-  reset_cold <= system_reset(1) or not pll_locked;
-  reset_warm <= system_reset(0) or not pll_locked;
-  dd_reset   <= reset_cold or soft_reset;
+  reset_cold <= system_reset(1) or not pll_locked or pause;
+
+  process(clk_sys, pll_locked)
+    variable pause_cnt : integer range 0 to 2147483647;
+    begin
+    if pll_locked = '0' then
+      pause <= '1';
+      pause_cnt := 34000000;
+    elsif rising_edge(clk_sys) then
+      if pause_cnt /= 0 then
+        pause_cnt := pause_cnt - 1;
+      elsif pause_cnt = 0 then 
+        pause <= '0';
+      end if;
+    end if;
+  end process;
 
   -- In the Apple ][, this was a 555 timer
   power_on : process(clk_core)
   begin
     if rising_edge(clk_core) then
       reset <= reset_warm or power_on_reset;
+      reset_warm <= system_reset(0) or not pll_locked or pause;
+      dd_reset   <= reset_cold or soft_reset;
 
       if reset_cold = '1' or soft_reset ='1' then
         power_on_reset <= '1';
@@ -488,6 +513,7 @@ joyUsb1    <= "00" & joystick0(5 downto 4) & x"0";
 joyUsb2    <= "00" & joystick1(5 downto 4) & x"0";
 joyDS2_p1  <= "00" & key_cross  & key_square  & x"0";
 joyDS2_p2  <= "00" & key_cross2 & key_square2 & x"0";
+joyMouse   <= "00" & mouse_btns & x"0";
 
 process(clk_core)
 begin
@@ -497,22 +523,25 @@ begin
       when "001"  => joy <= joyUsb2;
       when "010"  => joy <= joyDS2_p1;
       when "011"  => joy <= joyDS2_p2;
-      when others  => joy <= (others => '0');
+      when "100"  => joy <= joyMouse;
+      when others => joy <= (others => '0');
       end case;
   end if;
 end process;
 
-posy <= not paddle_1 when port_1_sel = "010" else 
-        not paddle_3 when port_1_sel = "011" else
-       (not joystick0ay(7) & joystick0ay(6 downto 0)) when port_1_sel = "000" else
-       (not joystick1ay(7) & joystick1ay(6 downto 0)) when port_1_sel = "001" else
-       x"ff";
+posy <= paddle_2(7) & not paddle_2(6 downto 0) when port_1_sel = "010" else
+        paddle_4(7) & not paddle_4(6 downto 0) when port_1_sel = "011" else
+        not joystick0ay(7) & joystick0ay(6 downto 0) when port_1_sel = "000" else
+        not joystick1ay(7) & joystick1ay(6 downto 0) when port_1_sel = "001" else
+        std_logic_vector(not mouse_y_joy(7) & mouse_y_joy(6 downto 0)) when port_1_sel = "100" else
+        x"ff";
 
-posx <= not paddle_2 when port_1_sel = "010" else
-        not paddle_4 when port_1_sel = "011" else
-       (not joystick0ax(7) & joystick0ax(6 downto 0)) when port_1_sel = "000" else 
-       (not joystick1ax(7) & joystick1ax(6 downto 0)) when port_1_sel = "001" else
-       x"ff";
+posx <= paddle_1(7) & not paddle_1(6 downto 0) when port_1_sel = "010" else
+        paddle_3(7) & not paddle_3(6 downto 0) when port_1_sel = "011" else
+        not joystick0ax(7) & joystick0ax(6 downto 0) when port_1_sel = "000" else 
+        not joystick1ax(7) & joystick1ax(6 downto 0) when port_1_sel = "001" else
+        std_logic_vector(not mouse_x_joy(7) & mouse_x_joy(6 downto 0)) when port_1_sel = "100" else
+        x"ff";
 
 joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
 
@@ -520,7 +549,7 @@ joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
   -- GAMEPORT input bits:
   --  7    6    5    4    3   2   1    0
   -- pdl3 pdl2 pdl1 pdl0 pb3 pb2 pb1 casette
-  GAMEPORT <=  "00" & joyy & joyx & "0" & (joy(5) or closed_apple) & (joy(4) or open_apple) & '0'; -- AUDIO_IN;
+  GAMEPORT <=  "00" & joyy & joyx & "0" & (joy(5) or closed_apple) & (joy(4) or open_apple) & uart_rx_muxed;
   
   process(clk_core, pdl_strobe)
     variable cx, cy : integer range -100 to 5800 := 0;
@@ -560,28 +589,26 @@ joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
 
   COLOR_LINE_CONTROL <= COLOR_LINE and not (system_monitor(1) or system_monitor(0));-- Color or B&W mode
   
-  -- sdram interface
   O_sdram_clk <= not clk_sys;
 
-  sdram_inst : entity work.sdram
-    port map( sd_data => IO_sdram_dq,
-              sd_addr => O_sdram_addr,
-              sd_dqm => O_sdram_dqm,
-              sd_cs => O_sdram_cs_n,
-              sd_ba => O_sdram_ba,
-              sd_we => O_sdram_wen_n,
-              sd_ras => O_sdram_ras_n,
-              sd_cas => O_sdram_cas_n,
-              clk => clk_sys,
-              clkref => CLK_2M,
-              init_n => pll_locked,
-              din => ram_di,
-              addr => ram_addr,
-              we => ram_we,
-              dout => DO,
-              aux => aux
+  sdram_inst : entity work.sdram port map( sd_data => IO_sdram_dq,
+    sd_addr => O_sdram_addr,
+    sd_dqm => O_sdram_dqm,
+    sd_cs => O_sdram_cs_n,
+    sd_ba => O_sdram_ba,
+    sd_we => O_sdram_wen_n,
+    sd_ras => O_sdram_ras_n,
+    sd_cas => O_sdram_cas_n,
+    clk => clk_sys,
+    clkref => CLK_2M,
+    init_n => pll_locked,
+    din => ram_di,
+    addr => ram_addr,
+    we => ram_we,
+    dout => DO,
+    aux => aux
     );
-  
+
   -- Simulate power up on cold reset to go to the disk boot routine
   ram_we   <= we_ram when reset_cold = '0' else '1';
   ram_addr <= "000000000" & std_logic_vector(a_ram) when reset_cold = '0' else std_logic_vector(to_unsigned(1012,ram_addr'length)); -- $3F4
@@ -590,13 +617,17 @@ joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
   PD <= PSG_DO when IO_SELECT(4) = '1' and system_mb = '1' else
         SSC_DO when SSC_OE = '1' and system_ssc = '1' else
         HDD_DO when (IO_SELECT(7) or DEVICE_SELECT(7)) = '1' and system_hdd = '1' else
-   --   MOUSE_DO when MOUSE_OE = '1' and system_mouse = '1' else
+        MOUSE_DO when MOUSE_OE = '1' and system_mouse = '1' else
         DISK_DO;
+
+  irq_n <= '1' when (psg_irq_n = '1' or system_mb = '0')
+                and (mouse_irq_n = '1' or system_mouse = '0')
+                and (ssc_irq_n = '1' or system_sscirq = '0' or system_ssc = '0') else '0';
 
   core : entity work.apple2 port map (
     CLK_14M        => clk_core,
     PALMODE        => not system_video_std,
-    ROMSWITCH      => system_videorom,
+    ROMSWITCH      => not system_videorom,
     CLK_2M         => CLK_2M,
     CPU_WAIT       => cpu_wait_hdd,
     PHASE_ZERO     => PHASE_ZERO,
@@ -612,7 +643,7 @@ joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
     aux            => aux,
     PD             => PD,
     CPU_WE         => cpu_we,
-    IRQ_N          => psg_irq_n and mouse_irq_n,
+    IRQ_N          => irq_n,
     NMI_N          => '1',
     ram_we         => we_ram,
     VIDEO          => VIDEO,
@@ -629,11 +660,12 @@ joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
     DEVICE_SELECT  => DEVICE_SELECT,
     speaker        => audio,
     -- load different video roms
-    ioctl_addr     => (others => '0'),
-    ioctl_data     => (others => '0'),
-    ioctl_index    => (others => '0'),
-    ioctl_download => '0',
-    ioctl_wr       => '0'
+    ioctl_addr     => "00" & ioctl_addr,
+    ioctl_data     => ioctl_data,
+    ioctl_index    => 7x"00" & load_rom,
+    ioctl_download => ioctl_download,
+    ioctl_wr       => ioctl_wr,
+    ioctl_clk      => clk_sys
     );
 
   tv : entity work.tv_controller port map (
@@ -673,11 +705,10 @@ joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
     );
 
 SD_LBA3 <= std_logic_vector( x"0000" & sector);
-sd_lba <= SD_LBA3 when (sd_rd(2) or sd_wr(2)) = '1' else SD_LBA2 when (sd_rd(1) or sd_wr(1)) = '1' else SD_LBA1;
---sd_wr_data <= SD_DATA_IN3 when (sd_rd(2) or sd_wr(2)) = '1' else SD_DATA_IN2 when (sd_rd(2) or sd_wr(2)) = '1' else SD_DATA_IN1;
-sd_wr_data <= SD_DATA_IN3 when (sd_wr(2)) = '1' else SD_DATA_IN2 when (sd_wr(2)) = '1' else SD_DATA_IN1;
-sd_rd(5 downto 3) <= "000";
-sd_wr(5 downto 3) <= "000";
+sd_lba <= SD_LBA4 when (sd_rd(3) or sd_wr(3)) = '1' else SD_LBA3 when (sd_rd(2) or sd_wr(2)) = '1' else SD_LBA2 when (sd_rd(1) or sd_wr(1)) = '1' else SD_LBA1;
+sd_wr_data <= SD_DATA_IN3 when (sd_rd(2) or sd_wr(2)) = '1' else SD_DATA_IN2 when (sd_rd(2) or sd_wr(2)) = '1' else SD_DATA_IN1;
+sd_rd(5 downto 4) <= "00";
+sd_wr(5 downto 4) <= "00";
 
 process(clk_sys, pll_locked)
 variable reset_cnt : integer range 0 to 2147483647;
@@ -891,6 +922,15 @@ process(clk_sys, dd_reset)
   end if;
 end process;
 
+  ssc_sw1 <= "00" & system_baudrate(0) & system_baudrate(1) & system_baudrate(2) & system_baudrate(3);
+
+  ssc_sw2(5) <= system_lfcr; -- LF after CR
+  ssc_sw2(4 downto 3) <= "00" when system_parity = "00" else -- no parity
+                         "10" when system_parity = "01" else -- odd parity
+                         "11"; -- even parity
+  ssc_sw2(2) <= system_databits; -- 8 data bits
+  ssc_sw2(1) <= '0'; -- 1 stop bit
+
   ssc : entity work.ssc port map (
     CLK_14M        => clk_core,
     CLK_2M         => CLK_2M,
@@ -904,45 +944,86 @@ end process;
     D_IN           => D,
     D_OUT          => SSC_DO,
     OE             => SSC_OE,
+    IRQ_N          => ssc_irq_n,
 
-    SW1            => (others => '1'),
-    SW2            => (others => '1'),
+    SW1            => ssc_sw1,
+    SW2            => ssc_sw2,
 
     UART_RX        => uart_rx_muxed,
     UART_TX        => uart_tx,
-    UART_CTS       => UART_CTS,
+    UART_CTS       => '0',
     UART_RTS       => UART_RTS,
     UART_DCD       => '0',
     UART_DSR       => '0',
     UART_DTR       => open
   );
 
-UART_CTS <= UART_RTS;
-
 -- external HW pin UART interface
 uart_rx_muxed <= uart_rx when system_uart = "00" else uart_ext_rx when system_uart = "01" else '1';
 uart_ext_tx <= uart_tx;
 
---  mouse : entity work.applemouse port map (
---    CLK_14M        => clk_core,
---    CLK_2M         => CLK_2M,
---    PHASE_ZERO     => PHASE_ZERO,
---    IO_SELECT      => IO_SELECT(5),
---    IO_STROBE      => IO_STROBE,
---    DEVICE_SELECT  => DEVICE_SELECT(5),
---    RESET          => reset,
---    A              => ADDR,
---    RNW            => not cpu_we,
---    D_IN           => D,
---    D_OUT          => MOUSE_DO,
---    OE             => MOUSE_OE,
---    IRQ_N          => mouse_irq_n,
+  mouse : entity work.applemouse port map (
+    CLK_14M        => clk_core,
+    CLK_2M         => CLK_2M,
+    PHASE_ZERO     => PHASE_ZERO,
+    IO_SELECT      => IO_SELECT(5),
+    IO_STROBE      => IO_STROBE,
+    DEVICE_SELECT  => DEVICE_SELECT(5),
+    RESET          => reset,
+    A              => ADDR,
+    RNW            => not cpu_we,
+    D_IN           => D,
+    D_OUT          => MOUSE_DO,
+    OE             => MOUSE_OE,
+    IRQ_N          => mouse_irq_n,
 
---    STROBE         => mouse_strobe,
---    X              => (others => '0'), --  mouse_x,
---    Y              => (others => '0'), --mouse_y,
---    BUTTON         => '0' -- mouse_flags(0)
---  );
+    STROBE         => mouse_strobe,
+    X              => mouse_x_pos,
+    Y              => mouse_y_pos,
+    BUTTON         => mouse_btns(0)
+  );
+
+process(clk_core, reset)
+ variable mov_x: signed(6 downto 0);
+ variable mov_y: signed(6 downto 0);
+ begin
+  if reset = '1' then
+    mouse_x_pos <= (others => '0');
+    mouse_y_pos <= (others => '0');
+    mouse_x_joy <= (others => '0');
+    mouse_y_joy <= (others => '0');
+  elsif rising_edge(clk_core) then
+    mouse_x_pos <= resize(mouse_x, mouse_x_pos'length);
+    mouse_y_pos <= - resize(mouse_y, mouse_y_pos'length);
+
+    mouse_strobeD <=mouse_strobeC;
+    mouse_strobe  <=mouse_strobeD;
+    mouse_xD <= mouse_xC;
+    mouse_x <= mouse_xD;
+    mouse_yD <= mouse_yC;
+    mouse_y <= mouse_yD;
+    mouse_btnsD <= mouse_btnsC;
+    mouse_btns <= mouse_btnsD;
+    if mouse_strobe = '1' then
+      if mouse_x > 40 then
+        mov_x:="0101000";
+      elsif mouse_x < -40 then
+        mov_x:= "1011000"; -- 0010 1000
+      else
+        mov_x := mouse_x(6 downto 0); 
+      end if;
+      if mouse_y > 40 then
+        mov_y:="0101000";
+      elsif mouse_y < -40 then
+        mov_y:= "1011000";
+      else 
+        mov_y := mouse_y(6 downto 0);
+      end if;
+    mouse_x_joy <= mouse_x_joy + mov_x;
+    mouse_y_joy <= mouse_y_joy + mov_y;
+    end if;
+  end if;
+end process;
 
 audio_sp(6 downto 0) <= (others => '0');
 audio_sp(7) <= audio;
@@ -1054,10 +1135,10 @@ hid_inst: entity work.hid
   kbd_strobe      => kbd_strobe,
   joystick0       => joystick0,
   joystick1       => joystick1,
-  mouse_btns      => mouse_btns,
-  mouse_x         => mouse_x,
-  mouse_y         => mouse_y,
-  mouse_strobe    => mouse_strobe,
+  mouse_btns      => mouse_btnsC,
+  mouse_x         => mouse_xC,
+  mouse_y         => mouse_yC,
+  mouse_strobe    => mouse_strobeC,
   joystick0ax     => joystick0ax,
   joystick0ay     => joystick0ay,
   joystick1ax     => joystick1ax,
@@ -1094,10 +1175,14 @@ module_inst: entity work.sysctrl
   system_mouse        => system_mouse,
   system_hdd          => system_hdd,
   system_videorom     => system_videorom,
-  system_joyswap      => system_joyswap,
   system_analogxy     => system_analogxy,
   system_uart         => system_uart,
   system_hdd_prot     => system_hdd_prot,
+  system_databits     => system_databits,
+  system_parity       => system_parity,
+  system_baudrate     => system_baudrate,
+  system_sscirq       => system_sscirq,
+  system_lfcr         => system_lfcr,
 
   -- port io (used to expose rs232)
   port_status         => (others => '0'),
@@ -1160,5 +1245,32 @@ generic map (
     outaddr         => sd_byte_index,     -- outaddr from 0 to 511, because the sector size is 512
     outbyte         => sd_rd_data         -- a byte of sector content
 );
+
+  loader_inst : entity work.loader_sd_card
+  port map (
+    clk               => clk_sys,
+    reset             => not pll_locked,
+  
+    sd_lba            => SD_LBA4,
+    sd_rd             => sd_rd(3),
+    sd_wr             => sd_wr(3),
+    sd_busy           => sd_busy,
+    sd_done           => sd_done,
+  
+    sd_byte_index     => sd_byte_index,
+    sd_rd_data        => sd_rd_data,
+    sd_rd_byte_strobe => sd_rd_byte_strobe,
+  
+    sd_img_mounted    => sd_img_mounted(3),
+    loader_busy       => loader_busy,
+    load_rom          => load_rom,
+    sd_img_size       => sd_img_size,
+  
+    ioctl_download    => ioctl_download,
+    ioctl_addr        => ioctl_addr,
+    ioctl_data        => ioctl_data,
+    ioctl_wr          => ioctl_wr,
+    ioctl_wait        => '0'
+  );
 
 end datapath;

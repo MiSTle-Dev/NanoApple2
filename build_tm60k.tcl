@@ -61,16 +61,16 @@ add_file src/hdd_rom.vhd
 add_file src/keyboard.vhd
 add_file src/ssc.vhd
 add_file src/ssc_rom.vhd
-add_file src/tang/console60k/nanoapple2.vhd
+add_file src/tang/tm60k/nanoapple2.vhd
 add_file src/timing_generator.vhd
 add_file src/tv_controller.vhd
 add_file src/tang/console60k/video_generator.vhd
-add_file src/tang/console60k/nanoapple2_tc60k.cst
-add_file src/tang/console60k/nanoapple2_tc60k.sdc
+add_file src/tang/tm60k/nanoapple2_tm60k.cst
+add_file src/tang/tm60k/nanoapple2_tm60k.sdc
 add_file src/gowin_sdpb/gowin_sdpb_8k_gw5a.vhd
 
 set_option -synthesis_tool gowinsynthesis
-set_option -output_base_name nanoapple2_tc60k
+set_option -output_base_name nanoapple2_tm60k
 set_option -verilog_std sysv2017
 set_option -vhdl_std vhd2008
 set_option -top_module nanoapple2

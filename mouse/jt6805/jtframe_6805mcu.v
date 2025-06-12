@@ -68,6 +68,8 @@ assign tirq     = tcr[TIR] & ~tcr[TIM]; // 6 => mask
 assign prfull   = { pres, fpin };
 assign prmx     = prfull[tcr[2:0]];
 
+assign tstop = 0;
+
 // Address decoder
 always @(*) begin
     rom_cs    = addr>=128;
@@ -142,11 +144,22 @@ always @(*) begin
     endcase
 end
 
-reg [7:0] intram[128];
-always @(posedge clk) begin
-    ram_dout <= intram[addr[6:0]];
-    if (ram_we) intram[addr[6:0]] <= dout;
-end
+//reg [7:0] intram[128];
+//always @(posedge clk) begin
+//    ram_dout <= intram[addr[6:0]];
+//    if (ram_we) intram[addr[6:0]] <= dout;
+//end
+
+Gowin_SP_128b ram6805(
+    .dout(ram_dout),
+    .clk(clk),
+    .oce(1'b1),
+    .ce(1'b1),
+    .reset(1'b0),
+    .wre(ram_we),
+    .ad(addr[6:0]),
+    .din(dout)
+);
 
 jt6805 u_mcu(
     .rst    ( rst       ),
@@ -160,5 +173,19 @@ jt6805 u_mcu(
     .irq    ( irq       ),
     .tirq   ( tirq      )
 );
+
+//UR6805 slave_core (
+//    .clk(clk),
+//    .clken(cen),
+//    .rst(rst),
+//    .extirq(irq),
+//    .timerirq(tirq),
+//    .sciirq(1'b0),
+//    .datain(din),
+//    .addr(addr),
+//    .wr(wr),
+//    .state(),
+//    .dataout(dout)
+//);
 
 endmodule
