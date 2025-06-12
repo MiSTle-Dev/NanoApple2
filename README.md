@@ -39,11 +39,12 @@ Features:
 * [USB Gamepad](https://en.wikipedia.org/wiki/Gamepad)
 * [USB XBOX 360 Controller](https://en.wikipedia.org/wiki/Xbox_360_controller)
 * [Dualshock 2 Controller Gamepad](https://en.wikipedia.org/wiki/DualShock) for [MiSTeryShield20k / MiSTeryShield20kPico](https://github.com/harbaum/MiSTeryNano/tree/main/board/misteryshield20k/README.md) via spare [pinheader](/board/misteryshield20k_ds2_adapter/misteryshield20k_ds2_adapter_cable.md)
+* [USB Mouse](https://en.wikipedia.org/wiki/Computer_mouse)
 * Disk loading via OSD. supported formats: .NIB
 * HDD loading via OSD. supported formats: .HDV (raw ProDOS partition images, 32MB)
 * Selectable 6502 or 65C02 CPU
 * Joystick support (analog proportional)
-* Mouse support
+* Mouse card in slot 5
 * Scanlines
 * Monitor type: Color, amber, green and black&white
 * Selection of color palette (NTSC //e, Apple IIgs, AppleWin, Custom)
@@ -96,7 +97,7 @@ The installation on the Tang Nano 20k board can be done using a Linux PC or a Wi
 * Slot 2 - Super Serial Card (SSC)
 * Slot 3 - 80 col + 64K RAM expansion (//e)
 * Slot 4 - Mockinboard model A (six audio channels)
-* Slot 5 - Mouse Interface
+* Slot 5 - Mouse Card
 * Slot 6 - Disk Drive controller
 * Slot 7 - Hard Disk Drive controller
 
