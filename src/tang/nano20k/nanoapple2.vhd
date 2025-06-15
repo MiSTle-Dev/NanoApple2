@@ -729,7 +729,7 @@ dram_inst: entity work.sdram port map(
 
 SD_LBA3 <= std_logic_vector( x"0000" & sector);
 sd_lba <= SD_LBA4 when (sd_rd(3) or sd_wr(3)) = '1' else SD_LBA3 when (sd_rd(2) or sd_wr(2)) = '1' else SD_LBA2 when (sd_rd(1) or sd_wr(1)) = '1' else SD_LBA1;
-sd_wr_data <= SD_DATA_IN3 when (sd_rd(2) or sd_wr(2)) = '1' else SD_DATA_IN2 when (sd_rd(2) or sd_wr(2)) = '1' else SD_DATA_IN1;
+sd_wr_data <= SD_DATA_IN3 when (sd_rd(2) or sd_wr(2)) = '1' else SD_DATA_IN2 when (sd_rd(1) or sd_wr(1)) = '1' else SD_DATA_IN1;
 sd_rd(5 downto 4) <= "00";
 sd_wr(5 downto 4) <= "00";
 
