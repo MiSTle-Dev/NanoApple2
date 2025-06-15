@@ -52,7 +52,7 @@ Features:
 * 64K base + 64K auxilary RAM with 80 column and double hi-res support
 * Mockingboard model A (two AY-3-8913 chips for six audio channels) in slot 4
 * Video ROM Switch (US /UK)
-* Loadable 8K custom Video ROM
+* Loadable 8K custom Video ROM (US / local)
 * SSC configuartion
 * Tape loading via the UART RX pin
 * Selectable mixed mode text color artifacts
@@ -170,7 +170,7 @@ invoke by F12 keypress
 
 ![controller](\.assets/controller-layout.png)  
 
-USB Joystick(s) or Gamepad(s) Stick as Joystick (no DPAD). OSD: **USB #1** or **USB #2**  
+USB Gamepad Stick as Joystick (no DPAD). OSD: **USB #1** or **USB #2**  
 ```Button A and B``` Buttons as Trigger:  
 
 or  
