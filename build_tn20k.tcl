@@ -69,6 +69,8 @@ add_file src/video_generator.vhd
 add_file src/tang/nano20k/nanoapple2.cst
 add_file src/tang/nano20k/nanoapple2.sdc
 add_file src/gowin_sdpb/gowin_sdpb_8k.vhd
+add_file src/uart6551/io_fifo.v
+add_file src/uart6551/uart_6551.v
 
 set_option -synthesis_tool gowinsynthesis
 set_option -output_base_name nanoapple2_tn20k

@@ -8,8 +8,7 @@ The Nano Apple IIe is a port of both [MiSTer](https://github.com/MiSTer-devel/Ap
 | [Tang Console 60K NEO](https://wiki.sipeed.com/hardware/en/tang/tang-console/mega-console.html)|[GW5AT-60](https://www.gowinsemi.com/en/product/detail/60/) | HDMI / LCD ||
 | [Tang Mega 60k NEO](https://wiki.sipeed.com/hardware/en/tang/tang-mega-60k/mega-60k.html)|[GW5AT-60](https://www.gowinsemi.com/en/product/detail/60/)| HDMI / LCD| |
 
-The project is still a work in progress.  
-Please report findings as issue.  
+**The project is still a work in progress. Please report findings as issue.**  
 
 This project relies on an external µC being connected to the Tang Nano 20K. You can use a [M0S Dock BL616](https://wiki.sipeed.com/hardware/en/maixzero/m0s/m0s.html), [Raspberry Pi Pico (W)](https://www.raspberrypi.com/documentation/microcontrollers/pico-series.html) or [esp32-s2](https://www.espressif.com/en/products/socs/esp32-s2)/[s3](https://www.espressif.com/en/products/socs/esp32-s3) and use the [FPGA companion firmware](http://github.com/harbaum/FPGA-Companion). Basically a µC acts as USB host for USB devices and as an OSD controller using a [SPI communication protocol](https://github.com/harbaum/MiSTeryNano/blob/main/SPI.md).
 
@@ -40,8 +39,8 @@ Features:
 * [USB XBOX 360 Controller](https://en.wikipedia.org/wiki/Xbox_360_controller)
 * [Dualshock 2 Controller Gamepad](https://en.wikipedia.org/wiki/DualShock) for [MiSTeryShield20k / MiSTeryShield20kPico](https://github.com/harbaum/MiSTeryNano/tree/main/board/misteryshield20k/README.md) via spare [pinheader](/board/misteryshield20k_ds2_adapter/misteryshield20k_ds2_adapter_cable.md)
 * [USB Mouse](https://en.wikipedia.org/wiki/Computer_mouse)
-* Disk loading via OSD. supported formats: .NIB
-* HDD loading via OSD. supported formats: .HDV (raw ProDOS partition images, 32MB)
+* Disk loading via OSD. supported formats: **.NIB**
+* HDD loading via OSD. supported formats: **.HDV** (raw ProDOS partition images, 32MB)
 * Selectable 6502 or 65C02 CPU
 * Joystick support (analog proportional)
 * Mouse card in slot 5
@@ -56,14 +55,17 @@ Features:
 * Loadable 8K custom Video ROM
 * SSC configuartion
 * Tape loading via the UART RX pin
+* Selectable mixed mode text color artifacts
+* FPGA Companion WIFI modem via SSC
 
 Planned features:
-
 * Tang Mega 138k Pro, Primer 25k support
-* FPGA companion build in WIFI modem via SSC
-* Option for mixed mode text color artifacts
 
 <img src="./.assets/apple2.png" alt="image" width="80%" height="auto">
+
+> [!TIP]
+> Be aware that this core loads **.NIB** Disk Drive images only identical to the MIST core.  
+> On the fly conversion from .DSK as the MISTer core is doing using Linux host system is not supported. 
 
 ## Tang Console 60k NEO
 
@@ -118,7 +120,8 @@ dd if=diskimage.2mg of=diskimage.hdv bs=64 skip=1
 On the "Apple ][" boot screen open the OSD with F12 and choose a disk. It will boot the disk automatically. 
 
 If you press reset you'll enter Applesoft with the ] prompt.
-From here you have some limited commands. See: http://www.landsnail.com/a2ref.htm
+From here you have some limited commands. See: http://www.landsnail.com/a2ref.htm.
+CAT
 
 If you want to boot another disk choose a .nib image via the osd and type the following:
 

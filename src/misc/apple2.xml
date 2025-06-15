@@ -143,11 +143,15 @@
  <listentry label="External" value="1"/>
  <listentry label="WIFI Modem" value="2"/>
       </list>
+      <list label="Lo-Res Text:" id="(" default="0">
+ <listentry label="Clean" value="0"/>
+ <listentry label="Composite" value="1"/>
+      </list>
  <button label="Cold Boot" action="cold_reset_hide"/>
     </menu>
     <menu label="Storage">
-      <fileselector label="Disk 0:" ext="nib;dsk;do;po" index="0" default="disk0.nib"/>
-      <fileselector label="Disk 1:" ext="nib;dsk;do;po" index="1" default="disk1.nib"/>
+      <fileselector label="Disk 0:" ext="nib" index="0" default="disk0.nib"/>
+      <fileselector label="Disk 1:" ext="nib" index="1" default="disk1.nib"/>
       <fileselector label="HDD:" ext="hdv" index="2" default="hdd.hdv"/>
       <fileselector label="Load Video ROM:" ext="bin" index="3"/>
       <list label="Disk prot.:" id="P" default="0">

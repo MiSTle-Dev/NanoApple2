@@ -68,6 +68,8 @@ add_file src/tang/console60k/video_generator.vhd
 add_file src/tang/tm60k/nanoapple2_tm60k.cst
 add_file src/tang/tm60k/nanoapple2_tm60k.sdc
 add_file src/gowin_sdpb/gowin_sdpb_8k_gw5a.vhd
+add_file src/uart6551/io_fifo.v
+add_file src/uart6551/uart_6551.v
 
 set_option -synthesis_tool gowinsynthesis
 set_option -output_base_name nanoapple2_tm60k
