@@ -174,18 +174,4 @@ jt6805 u_mcu(
     .tirq   ( tirq      )
 );
 
-//UR6805 slave_core (
-//    .clk(clk),
-//    .clken(cen),
-//    .rst(rst),
-//    .extirq(irq),
-//    .timerirq(tirq),
-//    .sciirq(1'b0),
-//    .datain(din),
-//    .addr(addr),
-//    .wr(wr),
-//    .state(),
-//    .dataout(dout)
-//);
-
 endmodule

@@ -36,32 +36,23 @@ entity ssc is
     UART_RTS       : out std_logic;
     UART_DCD       : in  std_logic;
     UART_DSR       : in  std_logic;
-    UART_DTR       : out std_logic
+    UART_DTR       : out std_logic;
+
+    clk_sys                   : in  std_logic;
+    wifimodem                 : in  std_logic;
+
+    serial_data_out_available : out std_logic_vector( 7 downto 0);  -- bytes available
+    serial_data_in_free       : out std_logic_vector( 7 downto 0);  -- free buffer available
+    serial_strobe_out         : in  std_logic;
+    serial_data_out           : out std_logic_vector( 7 downto 0);
+    serial_status_out         : out std_logic_vector(31 downto 0);
+    -- serial rs223 connection from io controller
+    serial_strobe_in          : in  std_logic;
+    serial_data_in            : in std_logic_vector( 7 downto 0)
     );
 end ssc;
 
 architecture rtl of ssc is
-
-  component gen_uart_mos_6551 port
-  (
-    reset  : in  std_logic;
-    clk    : in  std_logic;
-    clk_en : in  std_logic;
-    din    : in  std_logic_vector(7 downto 0);
-    dout   : out std_logic_vector(7 downto 0);
-    rnw    : in  std_logic;
-    cs     : in  std_logic;
-    rs     : in  std_logic_vector(1 downto 0);
-    irq_n  : out std_logic;
-    cts_n  : in  std_logic;
-    dcd_n  : in  std_logic;
-    dsr_n  : in  std_logic;
-    dtr_n  : out std_logic;
-    rts_n  : out std_logic;
-    rx     : in  std_logic;
-    tx     : out std_logic
-  );
-  end component gen_uart_mos_6551;
 
   signal rom_a : unsigned(10 downto 0);
   signal rom_dout : unsigned(7 downto 0);
@@ -70,6 +61,10 @@ architecture rtl of ssc is
   signal uart_clk_en : std_logic;
   signal uart_cs : std_logic;
   signal sw1_cs, sw2_cs : std_logic;
+  signal uart_dout_wifi : std_logic_vector(7 downto 0);
+  signal uart_dout_std  : std_logic_vector(7 downto 0);
+  signal wifi_cs : std_logic_vector(1 downto 0);
+  signal nullmdm1,nullmdm2 : std_logic;
 
 begin
 
@@ -123,12 +118,15 @@ begin
     CE     => uart_clk_en
   );
 
-  uart : entity work.gen_uart_mos_6551 port map (
+  wifi_cs <= '0' & uart_cs;
+  uart_dout <= uart_dout_wifi when wifimodem = '1' else uart_dout_std;
+
+uart : entity work.gen_uart_mos_6551 port map (
     reset  => RESET,
     clk    => CLK_14M,
     clk_en => uart_clk_en,
     din    => std_logic_vector(D_IN),
-    dout   => uart_dout,
+    dout   => uart_dout_std,
     rnw    => RNW,
     cs     => uart_cs,
     rs     => std_logic_vector( A(1 downto 0) ),
@@ -140,6 +138,38 @@ begin
     rts_n  => UART_RTS,
     rx     => UART_RX,
     tx     => UART_TX
+  );
+
+uart_wifi : entity work.glb6551 port map (
+  RESET_N     => not RESET,
+  CLK         => CLK_14M,
+  RX_CLK      => open,
+  RX_CLK_IN   => uart_clk_en,
+  XTAL_CLK_IN => uart_clk_en,
+  PH_2        => wifi_cs(0),
+  DI          => D_IN,
+  DO          => uart_dout_wifi,
+  IRQ         => open, -- IRQ_N,
+  CS          => wifi_cs,
+  RW_N        => RNW,
+  RS          => A(1 downto 0),
+  TXDATA_OUT  => open,
+  RXDATA_IN   => '1',
+  RTS         => nullmdm1,
+  CTS         => nullmdm1,
+  DCD         => nullmdm2,
+  DTR         => nullmdm2,
+  DSR         => nullmdm2,
+  -- serial/rs232 interface io-controller<-> UART
+  clk_sys             => clk_sys,
+  serial_status_out   => serial_status_out,
+  serial_data_out_available => serial_data_out_available,
+  serial_strobe_out   => serial_strobe_out,
+  serial_data_out     => serial_data_out,
+
+  serial_data_in_free => serial_data_in_free,
+  serial_strobe_in    =>  serial_strobe_in,
+  serial_data_in      => serial_data_in
   );
 
   -- ROM

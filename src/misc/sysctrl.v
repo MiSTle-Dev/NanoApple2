@@ -57,7 +57,8 @@ module sysctrl (
   output reg [1:0]  system_parity,
   output reg [3:0]  system_baudrate,
   output reg        system_sscirq,
-  output reg        system_lfcr
+  output reg        system_lfcr,
+  output reg        system_lores_text
 );
 
 reg [3:0] state;
@@ -137,6 +138,7 @@ always @(posedge clk) begin
       system_baudrate <= 4'd14;
       system_sscirq <= 1'b0;
       system_lfcr <= 1'b0;
+      system_lores_text <= 1'b0;
    end else begin // if (reset)
       //  bring button state into local clock domain
       buttonsD <= buttons;
@@ -252,6 +254,8 @@ always @(posedge clk) begin
                     if(id == "=") system_baudrate <= data_in[3:0];
                     //
                     if(id == "?") system_lfcr <= data_in[0];
+                    // 
+                    if(id == "(") system_lores_text <= data_in[0];
                 end
             end
 

@@ -146,7 +146,7 @@ architecture datapath of nanoapple2 is
   signal TRACK2 : unsigned(5 downto 0);
   signal DISK_READY : std_logic_vector(1 downto 0);
   signal DISK_CHANGE : std_logic_vector(1 downto 0);
-  signal disk_mount : std_logic_vector(1 downto 0);
+  signal DISK_MOUNT : std_logic_vector(1 downto 0);
 
   signal a_ram: unsigned(15 downto 0);
   signal r : unsigned(7 downto 0);
@@ -349,6 +349,18 @@ signal ioctl_data         : std_logic_vector(7 downto 0);
 signal ioctl_addr         : std_logic_vector(22 downto 0);
 signal ioctl_wait         : std_logic := '0';
 signal pause              : std_logic;
+signal serial_status      : std_logic_vector(31 downto 0);
+signal serial_tx_available: std_logic_vector(7 downto 0);
+signal serial_tx_strobe   : std_logic;
+signal serial_tx_data     : std_logic_vector(7 downto 0);
+signal serial_rx_available: std_logic_vector(7 downto 0);
+signal serial_rx_strobe   : std_logic;
+signal serial_rx_data     : std_logic_vector(7 downto 0);
+signal TEXT_COLOR         : std_logic;
+signal TEXT_MODE          : std_logic;
+signal system_lores_text  : std_logic;
+signal disk_mount_d       : std_logic_vector(1 downto 0);
+signal disk_chg_trg_d     : std_logic;
 
 component DCS
 generic (
@@ -585,8 +597,9 @@ joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
     end if;
   end process;
 
-  COLOR_LINE_CONTROL <= COLOR_LINE and not (system_monitor(1) or system_monitor(0));-- Color or B&W mode
-  
+  TEXT_COLOR <= '1' when system_monitor = "00" and system_lores_text = '1'else '0';
+  COLOR_LINE_CONTROL <= (COLOR_LINE or (TEXT_COLOR and not TEXT_MODE)) and not (system_monitor(1) or system_monitor(0));  -- Color or B&W mode
+
   O_sdram_clk <= not clk_sys;
 
   sdram_inst : entity work.sdram port map( sd_data => IO_sdram_dq,
@@ -624,8 +637,6 @@ joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
 
   core : entity work.apple2 port map (
     CLK_14M        => clk_core,
-    PALMODE        => not system_video_std,
-    ROMSWITCH      => not system_videorom,
     CLK_2M         => CLK_2M,
     CPU_WAIT       => cpu_wait_hdd,
     PHASE_ZERO     => PHASE_ZERO,
@@ -645,7 +656,10 @@ joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
     NMI_N          => '1',
     ram_we         => we_ram,
     VIDEO          => VIDEO,
+    PALMODE        => not system_video_std,
+    ROMSWITCH      => not system_videorom,
     COLOR_LINE     => COLOR_LINE,
+    TEXT_MODE      => TEXT_MODE,
     HBL            => HBL,
     VBL            => VBL,
     K              => K,
@@ -712,24 +726,27 @@ process(clk_sys, pll_locked)
 variable reset_cnt : integer range 0 to 2147483647;
   begin
   if pll_locked = '0' then
-    disk_mount(1 downto 0) <= "00";
-    hdd_mounted <= '0';
+    DISK_MOUNT(1 downto 0) <= "00";
     DISK_CHANGE(1 downto 0) <= "00";
+    hdd_mounted <= '0';
     disk_chg_trg <= '0';
     reset_cnt := 64000000;
   elsif rising_edge(clk_sys) then
+    disk_mount_d <= DISK_MOUNT;
+    disk_chg_trg_d <= disk_chg_trg;
+
     if reset_cnt /= 0 then
-      reset_cnt := reset_cnt - 1;
+          reset_cnt := reset_cnt - 1;
     elsif reset_cnt = 0 then
-      disk_chg_trg <= '1';
+          disk_chg_trg <= '1';
     end if;
 
     if sd_img_mounted(0) = '1' then
-        disk_mount(0) <= '0' when unsigned(sd_img_size) = 0 else '1';
+        DISK_MOUNT(0) <= '0' when unsigned(sd_img_size) = 0 else '1';
     end if;
 
     if sd_img_mounted(1) = '1' then
-        disk_mount(1) <= '0' when unsigned(sd_img_size) = 0 else '1';
+        DISK_MOUNT(1) <= '0' when unsigned(sd_img_size) = 0 else '1';
     end if;
 
     if sd_img_mounted(2) = '1' then
@@ -737,8 +754,20 @@ variable reset_cnt : integer range 0 to 2147483647;
       hdd_protect <= system_hdd_prot;
     end if;
 
-    DISK_CHANGE(0) <= disk_mount(0) and disk_chg_trg;
-    DISK_CHANGE(1) <= disk_mount(1) and disk_chg_trg;
+    if DISK_MOUNT(0) /= disk_mount_d(0)
+        or (disk_chg_trg_d = '0' and disk_chg_trg = '1') then
+        DISK_CHANGE(0) <= '1';
+    else
+        DISK_CHANGE(0) <= '0';
+    end if;
+
+    if DISK_MOUNT(1) /= disk_mount_d(1)
+        or (disk_chg_trg_d = '0' and disk_chg_trg = '1') then
+        DISK_CHANGE(1) <= '1';
+    else
+        DISK_CHANGE(1) <= '0';
+    end if;
+
   end if;
 end process;
 
@@ -755,7 +784,7 @@ sdcard_interface1: entity work.floppy_track port map (
     track        => std_logic_vector(TRACK1),
     busy         => TRACK1_RAM_BUSY,
     change       => DISK_CHANGE(0),
-    mount        => disk_mount(0),
+    mount        => DISK_MOUNT(0),
     ready        => DISK_READY(0),
     active       => D1_ACTIVE,
 
@@ -783,7 +812,7 @@ sdcard_interface2: entity work.floppy_track port map (
     track        => std_logic_vector(TRACK2),
     busy         => TRACK2_RAM_BUSY,
     change       => DISK_CHANGE(1),
-    mount        => disk_mount(1),
+    mount        => DISK_MOUNT(1),
     ready        => DISK_READY(1),
     active       => D2_ACTIVE,
 
@@ -953,7 +982,19 @@ end process;
     UART_RTS       => UART_RTS,
     UART_DCD       => '0',
     UART_DSR       => '0',
-    UART_DTR       => open
+    UART_DTR       => open,
+
+    clk_sys             => clk_sys,
+    wifimodem           => system_uart(1),
+    -- serial/rs232 interface io-controller<-> UART
+    serial_status_out   => serial_status,
+    serial_data_out_available => serial_tx_available,
+    serial_strobe_out   => serial_tx_strobe,
+    serial_data_out     => serial_tx_data,
+
+    serial_data_in_free => serial_rx_available,
+    serial_strobe_in    => serial_rx_strobe,
+    serial_data_in      => serial_rx_data
   );
 
 -- external HW pin UART interface
@@ -1181,15 +1222,16 @@ module_inst: entity work.sysctrl
   system_baudrate     => system_baudrate,
   system_sscirq       => system_sscirq,
   system_lfcr         => system_lfcr,
+  system_lores_text   => system_lores_text,
 
   -- port io (used to expose rs232)
-  port_status         => (others => '0'),
-  port_out_available  => (others => '0'),
-  port_out_strobe     => open,
-  port_out_data       => (others => '0'),
-  port_in_available   => (others => '0'),
-  port_in_strobe      => open,
-  port_in_data        => open,
+  port_status         => serial_status,
+  port_out_available  => serial_tx_available,
+  port_out_strobe     => serial_tx_strobe,
+  port_out_data       => serial_tx_data,
+  port_in_available   => serial_rx_available,
+  port_in_strobe      => serial_rx_strobe,
+  port_in_data        => serial_rx_data,
 
   int_out_n           => m0s(4),
   int_in              => unsigned'(x"0" & sdc_int & '0' & hid_int & '0'),
