@@ -32,7 +32,7 @@ entity nanoapple2 is
     clk_in      : in std_logic;
     s2_reset    : in std_logic; -- S2 button
     user        : in std_logic; -- S1 button
-    leds_n      : out std_logic_vector(2 downto 0);
+    leds_n      : out std_logic_vector(5 downto 0);
     -- onboard USB-C Tang BL616 UART
     uart_rx     : in std_logic;
     uart_tx     : out std_logic;
@@ -79,117 +79,117 @@ end nanoapple2;
 
 architecture datapath of nanoapple2 is
 
-  signal clk_sys : std_logic;
-  signal clk_core : std_logic;
-  signal clk_pixel_x5 : std_logic;
-  attribute syn_keep : integer;
-  attribute syn_keep of clk_sys : signal is 1;
-  attribute syn_keep of clk_core : signal is 1;
-  attribute syn_keep of clk_pixel_x5 : signal is 1;
-  signal CLK_2M, CLK_2M_D, PHASE_ZERO, PHASE_ZERO_R, PHASE_ZERO_F : std_logic;
-  signal clk_div : unsigned(1 downto 0);
-  signal IO_SELECT, DEVICE_SELECT : std_logic_vector(7 downto 0);
-  signal IO_STROBE : std_logic;
-  signal ADDR : unsigned(15 downto 0);
-  signal D, PD: unsigned(7 downto 0);
-  signal HDD_DO, DISK_DO, PSG_DO, SSC_DO, MOUSE_DO : unsigned(7 downto 0);
-  signal SSC_OE, MOUSE_OE : std_logic := '0';
-  signal DO : std_logic_vector(15 downto 0);
-  signal aux : std_logic;
-  signal cpu_we : std_logic;
-  signal psg_irq_n : std_logic := '1';
-  signal mouse_irq_n : std_logic :='1';
-  signal ssc_irq_n : std_logic := '1';
-  signal irq_n : std_logic;
-  signal we_ram : std_logic;
-  signal VIDEO, HBL, VBL : std_logic;
-  signal COLOR_LINE : std_logic;
-  signal COLOR_LINE_CONTROL : std_logic;
-  signal GAMEPORT : std_logic_vector(7 downto 0);
-  signal scandoubler_disable : std_logic;
-  signal ypbpr : std_logic;
-  signal no_csync : std_logic;
+signal clk_sys : std_logic;
+signal clk_core : std_logic;
+signal clk_pixel_x5 : std_logic;
+attribute syn_keep : integer;
+attribute syn_keep of clk_sys : signal is 1;
+attribute syn_keep of clk_core : signal is 1;
+attribute syn_keep of clk_pixel_x5 : signal is 1;
+signal CLK_2M, CLK_2M_D, PHASE_ZERO, PHASE_ZERO_R, PHASE_ZERO_F : std_logic;
+signal clk_div : unsigned(1 downto 0);
+signal IO_SELECT, DEVICE_SELECT : std_logic_vector(7 downto 0);
+signal IO_STROBE : std_logic;
+signal ADDR : unsigned(15 downto 0);
+signal D, PD: unsigned(7 downto 0);
+signal HDD_DO, DISK_DO, PSG_DO, SSC_DO, MOUSE_DO : unsigned(7 downto 0);
+signal SSC_OE, MOUSE_OE : std_logic := '0';
+signal DO : std_logic_vector(15 downto 0);
+signal aux : std_logic;
+signal cpu_we : std_logic;
+signal psg_irq_n : std_logic := '1';
+signal mouse_irq_n : std_logic :='1';
+signal ssc_irq_n : std_logic := '1';
+signal irq_n : std_logic;
+signal we_ram : std_logic;
+signal VIDEO, HBL, VBL : std_logic;
+signal COLOR_LINE : std_logic;
+signal COLOR_LINE_CONTROL : std_logic;
+signal GAMEPORT : std_logic_vector(7 downto 0);
+signal scandoubler_disable : std_logic;
+signal ypbpr : std_logic;
+signal no_csync : std_logic;
 
-  signal K : unsigned(7 downto 0);
-  signal read_key : std_logic;
-  signal akd : std_logic;
+signal K : unsigned(7 downto 0);
+signal read_key : std_logic;
+signal akd : std_logic;
 
-  signal flash_clk : unsigned(22 downto 0) := (others => '0');
-  signal power_on_reset : std_logic := '1';
-  signal reset : std_logic := '1';
+signal flash_clk : unsigned(22 downto 0) := (others => '0');
+signal power_on_reset : std_logic := '1';
+signal reset : std_logic := '1';
 
-  signal D1_ACTIVE, D2_ACTIVE : std_logic;
-  signal TRACK1_RAM_BUSY : std_logic;
-  signal TRACK1_RAM_ADDR : unsigned(12 downto 0);
-  signal TRACK1_RAM_DI : unsigned(7 downto 0);
-  signal TRACK1_RAM_DO : unsigned(7 downto 0);
-  signal TRACK1_RAM_WE : std_logic;
-  signal TRACK1 : unsigned(5 downto 0);
-  signal TRACK2_RAM_BUSY : std_logic;
-  signal TRACK2_RAM_ADDR : unsigned(12 downto 0);
-  signal TRACK2_RAM_DI : unsigned(7 downto 0);
-  signal TRACK2_RAM_DO : unsigned(7 downto 0);
-  signal TRACK2_RAM_WE : std_logic;
-  signal TRACK2 : unsigned(5 downto 0);
-  signal DISK_READY : std_logic_vector(1 downto 0);
-  signal DISK_CHANGE : std_logic_vector(1 downto 0);
-  signal DISK_MOUNT : std_logic_vector(1 downto 0);
+signal D1_ACTIVE, D2_ACTIVE : std_logic;
+signal TRACK1_RAM_BUSY : std_logic;
+signal TRACK1_RAM_ADDR : unsigned(12 downto 0);
+signal TRACK1_RAM_DI : unsigned(7 downto 0);
+signal TRACK1_RAM_DO : unsigned(7 downto 0);
+signal TRACK1_RAM_WE : std_logic;
+signal TRACK1 : unsigned(5 downto 0);
+signal TRACK2_RAM_BUSY : std_logic;
+signal TRACK2_RAM_ADDR : unsigned(12 downto 0);
+signal TRACK2_RAM_DI : unsigned(7 downto 0);
+signal TRACK2_RAM_DO : unsigned(7 downto 0);
+signal TRACK2_RAM_WE : std_logic;
+signal TRACK2 : unsigned(5 downto 0);
+signal DISK_READY : std_logic_vector(1 downto 0);
+signal DISK_CHANGE : std_logic_vector(1 downto 0);
+signal DISK_MOUNT : std_logic_vector(1 downto 0);
 
-  signal a_ram: unsigned(15 downto 0);
-  signal r : unsigned(7 downto 0);
-  signal g : unsigned(7 downto 0);
-  signal b : unsigned(7 downto 0);
-  signal blank : std_logic;
-  signal hsync : std_logic;
-  signal vsync : std_logic;
-  signal ram_we : std_logic;
-  signal ram_di : std_logic_vector(7 downto 0);
-  signal ram_addr : std_logic_vector(24 downto 0);
-  signal joy        : std_logic_vector(7 downto 0);
-  signal joy_an     : std_logic_vector(15 downto 0);
-  signal mouse_strobe : std_logic;
-  signal mouse_flags  : std_logic_vector(7 downto 0);
-  signal mouse_x_pos : signed(8 downto 0);
-  signal mouse_y_pos : signed(8 downto 0);
-  signal mouse_x_joy : signed(10 downto 0);
-  signal mouse_y_joy : signed(10 downto 0);
-  signal mouse_btns  : std_logic_vector(1 downto 0);
-  signal audio_sp    : unsigned(9 downto 0);
-  signal psg_audio_l : unsigned(9 downto 0);
-  signal psg_audio_r : unsigned(9 downto 0);
-  signal audio       : std_logic;
+signal a_ram: unsigned(15 downto 0);
+signal r : unsigned(7 downto 0);
+signal g : unsigned(7 downto 0);
+signal b : unsigned(7 downto 0);
+signal blank : std_logic;
+signal hsync : std_logic;
+signal vsync : std_logic;
+signal ram_we : std_logic;
+signal ram_di : std_logic_vector(7 downto 0);
+signal ram_addr : std_logic_vector(24 downto 0);
+signal joy        : std_logic_vector(7 downto 0);
+signal joy_an     : std_logic_vector(15 downto 0);
+signal mouse_strobe : std_logic;
+signal mouse_flags  : std_logic_vector(7 downto 0);
+signal mouse_x_pos : signed(8 downto 0);
+signal mouse_y_pos : signed(8 downto 0);
+signal mouse_x_joy : signed(10 downto 0);
+signal mouse_y_joy : signed(10 downto 0);
+signal mouse_btns  : std_logic_vector(1 downto 0);
+signal audio_sp    : unsigned(9 downto 0);
+signal psg_audio_l : unsigned(9 downto 0);
+signal psg_audio_r : unsigned(9 downto 0);
+signal audio       : std_logic;
 
-  -- signals to connect sd card emulation with io controller
-  signal sd_lba:  std_logic_vector(31 downto 0) := (others => '0');
-  signal sd_rd:   std_logic_vector(5 downto 0) := (others => '0');
-  signal sd_wr:   std_logic_vector(5 downto 0) := (others => '0');
-  signal SD_LBA1:  std_logic_vector(31 downto 0);
-  signal SD_LBA2:  std_logic_vector(31 downto 0);
-  signal SD_LBA3:  std_logic_vector(31 downto 0);
-  signal SD_LBA4:  std_logic_vector(31 downto 0);
+-- signals to connect sd card emulation with io controller
+signal sd_lba:  std_logic_vector(31 downto 0) := (others => '0');
+signal sd_rd:   std_logic_vector(5 downto 0) := (others => '0');
+signal sd_wr:   std_logic_vector(5 downto 0) := (others => '0');
+signal SD_LBA1:  std_logic_vector(31 downto 0);
+signal SD_LBA2:  std_logic_vector(31 downto 0);
+signal SD_LBA3:  std_logic_vector(31 downto 0);
+signal SD_LBA4:  std_logic_vector(31 downto 0);
 
-  -- data from io controller to sd card emulation
-  signal sd_data_in: std_logic_vector(7 downto 0);
-  signal sd_data_out: std_logic_vector(7 downto 0);
-  signal sd_data_out_strobe:  std_logic;
-  signal sd_buff_addr: std_logic_vector(8 downto 0);
-  signal SD_DATA_IN1: std_logic_vector(7 downto 0);
-  signal SD_DATA_IN2: std_logic_vector(7 downto 0);
-  signal SD_DATA_IN3: std_logic_vector(7 downto 0);
+-- data from io controller to sd card emulation
+signal sd_data_in: std_logic_vector(7 downto 0);
+signal sd_data_out: std_logic_vector(7 downto 0);
+signal sd_data_out_strobe:  std_logic;
+signal sd_buff_addr: std_logic_vector(8 downto 0);
+signal SD_DATA_IN1: std_logic_vector(7 downto 0);
+signal SD_DATA_IN2: std_logic_vector(7 downto 0);
+signal SD_DATA_IN3: std_logic_vector(7 downto 0);
 
-  signal pll_locked : std_logic;
-  signal joyx       : std_logic;
-  signal joyy       : std_logic;
-  signal pdl_strobe : std_logic;
-  signal open_apple : std_logic;
-  signal closed_apple : std_logic;
-  -- joystick interface
-  signal joyUsb1      : std_logic_vector(7 downto 0);
-  signal joyUsb2      : std_logic_vector(7 downto 0);
-  signal joyDS2_p1    : std_logic_vector(7 downto 0);
-  signal joyDS2_p2    : std_logic_vector(7 downto 0);
-  signal joyMouse     : std_logic_vector(7 downto 0);
-  signal port_1_sel   : std_logic_vector(2 downto 0);
+signal pll_locked : std_logic;
+signal joyx       : std_logic;
+signal joyy       : std_logic;
+signal pdl_strobe : std_logic;
+signal open_apple : std_logic;
+signal closed_apple : std_logic;
+-- joystick interface
+signal joyUsb1      : std_logic_vector(7 downto 0);
+signal joyUsb2      : std_logic_vector(7 downto 0);
+signal joyDS2_p1    : std_logic_vector(7 downto 0);
+signal joyDS2_p2    : std_logic_vector(7 downto 0);
+signal joyMouse     : std_logic_vector(7 downto 0);
+signal port_1_sel   : std_logic_vector(2 downto 0);
 -- mouse / paddle
 signal posx            : std_logic_vector(7 downto 0);
 signal posy            : std_logic_vector(7 downto 0);
@@ -286,8 +286,6 @@ signal sd_byte_index  : std_logic_vector(8 downto 0);
 signal sd_rd_data     : std_logic_vector(7 downto 0);
 signal sd_wr_data     : std_logic_vector(7 downto 0);
 signal disk_chg_trg   : std_logic;
-signal UART_CTS       : std_logic;
-signal UART_RTS        : std_logic;
 signal sector             : unsigned(15 downto 0);
 signal hdd_mounted        : std_logic := '0';
 signal hdd_read           : std_logic;
@@ -348,6 +346,8 @@ signal TEXT_MODE          : std_logic;
 signal system_lores_text  : std_logic;
 signal disk_mount_d       : std_logic_vector(1 downto 0);
 signal disk_chg_trg_d     : std_logic;
+signal nullmdm1, nullmdm2 : std_logic;
+signal leds               : std_logic_vector(5 downto 0);
 
 component DCS
 generic (
@@ -379,7 +379,6 @@ end component;
 
 begin
 
-  leds_n(1 downto 0) <= "11";
   reset_cold <= system_reset(1) or not pll_locked or pause;
 
   process(clk_sys, pll_locked)
@@ -754,13 +753,9 @@ variable reset_cnt : integer range 0 to 2147483647;
 
     if sd_img_mounted(0) = '1' then
         DISK_MOUNT(0) <= '0' when unsigned(sd_img_size) = 0 else '1';
-    end if;
-
-    if sd_img_mounted(1) = '1' then
+    elsif sd_img_mounted(1) = '1' then
         DISK_MOUNT(1) <= '0' when unsigned(sd_img_size) = 0 else '1';
-    end if;
-
-    if sd_img_mounted(2) = '1' then
+    elsif sd_img_mounted(2) = '1' then
       hdd_mounted <= '0' when unsigned(sd_img_size) = 0 else '1';
       hdd_protect <= system_hdd_prot;
     end if;
@@ -869,7 +864,13 @@ sdcard_interface2: entity work.floppy_track port map (
     TRACK2_BUSY    => TRACK2_RAM_BUSY
     );
 
-  leds_n(2) <= D1_ACTIVE or D2_ACTIVE;
+  leds_n <= not leds;
+  leds(0) <= D1_ACTIVE;
+  leds(1) <= D2_ACTIVE;
+  leds(2) <= DISK_MOUNT(0);
+  leds(3) <= DISK_MOUNT(1);
+  leds(4) <= hdd_mounted;
+  leds(5) <= '0';
 
   mb : entity  work.mockingboard port map (
       CLK_14M      => clk_core,
@@ -989,11 +990,11 @@ end process;
 
     UART_RX        => uart_rx_muxed,
     UART_TX        => uart_tx,
-    UART_CTS       => '0',
-    UART_RTS       => UART_RTS,
-    UART_DCD       => '0',
-    UART_DSR       => '0',
-    UART_DTR       => open,
+    UART_CTS       => nullmdm1,
+    UART_RTS       => nullmdm1,
+    UART_DCD       => nullmdm2,
+    UART_DSR       => nullmdm2,
+    UART_DTR       => nullmdm2,
 
     clk_sys             => clk_sys,
     wifimodem           => system_uart(1),

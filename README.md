@@ -105,8 +105,7 @@ The installation on the Tang Nano 20k board can be done using a Linux PC or a Wi
 
 ## Disk format notes
 
-On the "Apple //e" boot screen open the OSD with F12 and choose a nibblelized disk. It will boot
-the disk automatically. Use dsk2nib to convert AppleII disk images to .nib images.  
+Use [dsk2nib](https://github.com/slotek/dsk2nib) to convert AppleII disk images to .nib images.  
 
 For HDD, only HDV images (raw ProDOS partition images) 32MB in size are supported.  
 A Cold Reset is needed to boot from HDD.
@@ -119,9 +118,8 @@ dd if=diskimage.2mg of=diskimage.hdv bs=64 skip=1
 
 On the "Apple ][" boot screen open the OSD with F12 and choose a disk. It will boot the disk automatically. 
 
-If you press reset you'll enter Applesoft with the ] prompt.
+If you OSD press ```reset``` you'll enter Applesoft with the ] prompt.
 From here you have some limited commands. See: http://www.landsnail.com/a2ref.htm.
-CAT
 
 If you want to boot another disk choose a .nib image via the osd and type the following:
 
@@ -136,7 +134,7 @@ or
 *C600G
 ```
 
-The HDD interface is in slot 7. Unlike the floppy interface, it does not stall until an image is mounted, so either cold reset the machine or use one of the following after mounting an image:
+The HDD interface is in slot 7. Unlike the floppy interface, it does not stall until an image is mounted, so either press OSD ```cold reset``` or use one of the following after mounting an image:
 
 ```
 ]PR#7
@@ -189,9 +187,13 @@ Dualshock 2 Gamepad Stick as Joystick. OSD: **DS #1** or **DS #2**<br>
 
 | LED | function         |TN9K  |TN20K |TP20K  |TP25K  |TM60K   |TM138k|Console60k|
 | --- |        -         |-     |-     |-      | -     | -      | -    |-         |
-| 0   | unsupported      |-     |-     |-      | x     | x      | x    |-         |
-| 1   | FDD              |-     |-     |-      | x     | x      | x    |-         |
-| 2   | FDD              |-     |x     |-      | -     | -      | -    |x         |
+| 0   | FDD1 activity    |-     |x     |-      | -     | x      | -    |x         |
+| 1   | FDD2 activity    |-     |x     |-      | -     | x      | -    |x         |
+| 2   | FDD1 mounted     |-     |x     |-      | -     | -      | -    |-         |
+| 3   | FDD2 mounted     |-     |x     |-      | -     | -      | -    |-         |
+| 4   | HDD mounted      |-     |x     |-      | -     | -      | -    |-         |
+| 5   | unused           |-     |x     |-      | -     | -      | -    |-         |
+
 
 **Multicolor RGB LED**
 

@@ -19,12 +19,12 @@ IO_PORT "tmds_d_p[0]" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
 IO_LOC "tmds_clk_p" 33,34;
 IO_PORT "tmds_clk_p" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
 
-//IO_LOC "leds_n[5]" 20;
-//IO_PORT "leds_n[5]" IO_TYPE=LVCMOS33 PULL_MODE=UP;
-//IO_LOC "leds_n[4]" 19; 
-//IO_PORT "leds_n[4]" IO_TYPE=LVCMOS33 PULL_MODE=UP;
-//IO_LOC "leds_n[3]" 18; 
-//IO_PORT "leds_n[3]" IO_TYPE=LVCMOS33 PULL_MODE=UP;
+IO_LOC "leds_n[5]" 20;
+IO_PORT "leds_n[5]" IO_TYPE=LVCMOS33 PULL_MODE=UP;
+IO_LOC "leds_n[4]" 19; 
+IO_PORT "leds_n[4]" IO_TYPE=LVCMOS33 PULL_MODE=UP;
+IO_LOC "leds_n[3]" 18; 
+IO_PORT "leds_n[3]" IO_TYPE=LVCMOS33 PULL_MODE=UP;
 IO_LOC "leds_n[2]" 17; 
 IO_PORT "leds_n[2]" IO_TYPE=LVCMOS33 PULL_MODE=UP;
 IO_LOC "leds_n[1]" 16;
