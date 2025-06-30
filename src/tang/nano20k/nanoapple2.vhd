@@ -151,8 +151,8 @@ signal mouse_strobe : std_logic;
 signal mouse_flags  : std_logic_vector(7 downto 0);
 signal mouse_x_pos : signed(8 downto 0);
 signal mouse_y_pos : signed(8 downto 0);
-signal mouse_x_joy : signed(10 downto 0);
-signal mouse_y_joy : signed(10 downto 0);
+signal mouse_x_joy : std_logic_vector(7 downto 0);
+signal mouse_y_joy : std_logic_vector(7 downto 0);
 signal mouse_btns  : std_logic_vector(1 downto 0);
 signal audio_sp    : unsigned(9 downto 0);
 signal psg_audio_l : unsigned(9 downto 0);
@@ -217,7 +217,6 @@ signal mouse_x         : signed(7 downto 0);
 signal mouse_y         : signed(7 downto 0);
 signal mouse_strobeC   : std_logic;
 signal mouse_strobeD   : std_logic;
-
 signal paddle_1        : std_logic_vector(7 downto 0);
 signal paddle_2        : std_logic_vector(7 downto 0);
 signal paddle_3        : std_logic_vector(7 downto 0);
@@ -550,14 +549,14 @@ posy <= paddle_2(7) & not paddle_2(6 downto 0) when port_1_sel = "010" else
         paddle_4(7) & not paddle_4(6 downto 0) when port_1_sel = "011" else
         not joystick0ay(7) & joystick0ay(6 downto 0) when port_1_sel = "000" else
         not joystick1ay(7) & joystick1ay(6 downto 0) when port_1_sel = "001" else
-        std_logic_vector(not mouse_y_joy(7) & mouse_y_joy(6 downto 0)) when port_1_sel = "100" else
+        std_logic_vector(mouse_y_joy(7 downto 0)) when port_1_sel = "100" else
         x"ff";
 
 posx <= paddle_1(7) & not paddle_1(6 downto 0) when port_1_sel = "010" else
         paddle_3(7) & not paddle_3(6 downto 0) when port_1_sel = "011" else
         not joystick0ax(7) & joystick0ax(6 downto 0) when port_1_sel = "000" else 
         not joystick1ax(7) & joystick1ax(6 downto 0) when port_1_sel = "001" else
-        std_logic_vector(not mouse_x_joy(7) & mouse_x_joy(6 downto 0)) when port_1_sel = "100" else
+        std_logic_vector(mouse_x_joy(7 downto 0)) when port_1_sel = "100" else
         x"ff";
 
 joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
@@ -1035,43 +1034,68 @@ uart_ext_tx <= uart_tx;
   );
 
 process(clk_core, reset)
- variable mov_x: signed(6 downto 0);
- variable mov_y: signed(6 downto 0);
+ variable mx  : signed(8 downto 0);
+ variable nmx : signed(8 downto 0);
+ variable mdx : signed(8 downto 0);
+ variable mdx2: signed(8 downto 0);
+ variable nmy : signed(8 downto 0);
+ variable mdy : signed(8 downto 0);
+ variable mdy2: signed(8 downto 0);
+ variable my  : signed(8 downto 0);
+
  begin
   if reset = '1' then
     mouse_x_pos <= (others => '0');
     mouse_y_pos <= (others => '0');
     mouse_x_joy <= (others => '0');
     mouse_y_joy <= (others => '0');
+    nmx := to_signed(0, nmx'length);
+    nmy := to_signed(0, nmy'length);
+    mx := to_signed(0, mx'length);
+    my := to_signed(0, my'length);
   elsif rising_edge(clk_core) then
-    mouse_x_pos <= resize(mouse_x, mouse_x_pos'length);
-    mouse_y_pos <= - resize(mouse_y, mouse_y_pos'length);
-
     mouse_strobeD <=mouse_strobeC;
-    mouse_strobe  <=mouse_strobeD;
+    mouse_strobe <=mouse_strobeD;
     mouse_xD <= mouse_xC;
     mouse_x <= mouse_xD;
     mouse_yD <= mouse_yC;
     mouse_y <= mouse_yD;
     mouse_btnsD <= mouse_btnsC;
     mouse_btns <= mouse_btnsD;
+    mouse_x_pos <= resize(mouse_x, mouse_x_pos'length);
+    mouse_y_pos <= - resize(mouse_y, mouse_y_pos'length);
+
     if mouse_strobe = '1' then
-      if mouse_x > 40 then
-        mov_x:="0101000";
-      elsif mouse_x < -40 then
-        mov_x:= "1011000"; -- 0010 1000
-      else
-        mov_x := mouse_x(6 downto 0); 
-      end if;
-      if mouse_y > 40 then
-        mov_y:="0101000";
-      elsif mouse_y < -40 then
-        mov_y:= "1011000";
+      mdx := resize(mouse_x, mdx'length);
+      if mdx > 10 then 
+        mdx2:= to_signed(10,mdx2'length);
+      elsif mdx < -10 then 
+        mdx2:= to_signed(-10,mdx2'length);
       else 
-        mov_y := mouse_y(6 downto 0);
+        mdx2 := mdx;
       end if;
-    mouse_x_joy <= mouse_x_joy + mov_x;
-    mouse_y_joy <= mouse_y_joy + mov_y;
+      nmx := mx + mdx2;
+
+      mdy := resize(mouse_y, mdy'length);
+      if mdy > 10 then 
+        mdy2:= to_signed(10,mdy2'length);
+      elsif mdy < -10 then 
+        mdy2:= to_signed(-10,mdy2'length);
+      else 
+        mdy2 := mdy;
+      end if;
+      nmy := my + mdy2;
+
+      mx := to_signed(-128, mx'length) when nmx < -128
+          else to_signed(127, mx'length) when nmx > 127
+          else nmx;
+
+      my := to_signed(-128, my'length) when nmy < -128
+          else to_signed(127, my'length) when nmy > 127
+          else nmy;
+
+      mouse_x_joy <= std_logic_vector(mx(7 downto 0));
+      mouse_y_joy <= std_logic_vector(my(7 downto 0));
     end if;
   end if;
 end process;

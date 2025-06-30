@@ -1,83 +1,49 @@
-module glb6551(
-RESET_N,
-CLK,
-RX_CLK,
-RX_CLK_IN,
-XTAL_CLK_IN,
-PH_2,
-DI,
-DO,
-IRQ,
-CS,
-RW_N,
-RS,
-TXDATA_OUT,
-RXDATA_IN,
-RTS,
-CTS,
-DCD,
-DTR,
-DSR,
-
+module glb6551
+(
+input RESET_N,
+input CLK,
+output RX_CLK,
+input RX_CLK_IN,
+input XTAL_CLK_IN,
+input PH_2,
+input [7:0] DI,
+output [7:0] DO,
+output IRQ,
+input [1:0] CS,
+input RW_N,
+input [1:0] RS,
+output TXDATA_OUT,
+input RXDATA_IN,
+output RTS,
+input CTS,
+input DCD,
+output DTR,
+input DSR,
 // serial rs232 connection to io controller
-clk_sys,
-serial_data_out_available,  // bytes available
-serial_data_in_free,        // free buffer available
-serial_strobe_out,
-serial_data_out,
-serial_status_out,
-
+input clk_sys,
+output [7:0] serial_data_out_available,  // bytes available
+output [7:0] serial_data_in_free,        // free buffer available
+input serial_strobe_out,
+output [7:0] serial_data_out,
+output [31:0] serial_status_out,
 // serial rs223 connection from io controller
-serial_strobe_in,
-serial_data_in
+input serial_strobe_in,
+input [7:0] serial_data_in
 );
 
-input				RESET_N;
-input				CLK;
-output				RX_CLK;
-input				RX_CLK_IN;
-input				XTAL_CLK_IN;
-input				PH_2;
-input		[7:0]	DI;
-output		[7:0]	DO;
-output				IRQ;
-input		[1:0]	CS;
-input		[1:0]	RS;
-input				RW_N;
-output				TXDATA_OUT;
-input				RXDATA_IN;
-output				RTS;
-input				CTS;
-input				DCD;
-output				DTR;
-input				DSR;
+wire [7:0] STATUS_REG;
+reg [7:0] CTL_REG = 8'd0;
+reg [7:0] CMD_REG = 8'd0;
+reg OVERRUN = 1'b0;
+reg FRAME = 1'b0;
+reg PARITY = 1'b0;
+reg TDRE;
+reg RDRF;
 
-// serial rs232 connection to io controller
-input               clk_sys;
-output		[7:0]	serial_data_out_available;
-output		[7:0]	serial_data_in_free;
-input				serial_strobe_out;
-output		[7:0]	serial_data_out;
-output    [31:0]	serial_status_out;
-
-// serial rs223 connection from io controller
-input				serial_strobe_in;
-input		[7:0]	serial_data_in;
-
-
-wire	[7:0]		STATUS_REG;
-reg		[7:0]		CTL_REG = 8'd0;
-reg		[7:0]		CMD_REG = 8'd0;
-reg					OVERRUN = 1'b0;
-reg					FRAME = 1'b0;
-reg					PARITY = 1'b0;
-reg					TDRE;
-reg					RDRF;
-
-wire	[1:0]		WORD_SELECT;
-wire				RESET_X;
-wire				PAR_DIS;
-reg					RESET_NX;
+wire [1:0] WORD_SELECT;
+wire RESET_X;
+wire PAR_DIS;
+reg RESET_NX;
 
 // report the available unused space in the input fifo
 assign serial_data_in_free = { 4'h0, serial_data_in_space };

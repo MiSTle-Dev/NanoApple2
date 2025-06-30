@@ -7,6 +7,7 @@ The Nano Apple IIe is a port of both [MiSTer](https://github.com/MiSTer-devel/Ap
 | [Tang Nano 20k](https://wiki.sipeed.com/nano20k)     | [GW2AR](https://www.gowinsemi.com/en/product/detail/38/)  |HDMI | |
 | [Tang Console 60K NEO](https://wiki.sipeed.com/hardware/en/tang/tang-console/mega-console.html)|[GW5AT-60](https://www.gowinsemi.com/en/product/detail/60/) | HDMI / LCD ||
 | [Tang Mega 60k NEO](https://wiki.sipeed.com/hardware/en/tang/tang-mega-60k/mega-60k.html)|[GW5AT-60](https://www.gowinsemi.com/en/product/detail/60/)| HDMI / LCD| |
+| [Tang Mega 138k Pro](https://wiki.sipeed.com/hardware/en/tang/tang-mega-138k/mega-138k-pro.html)|[GW5AST-138](https://www.gowinsemi.com/en/product/detail/60/) |HDMI / LCD| |
 
 **The project is still a work in progress. Please report findings as issue.**  
 
@@ -38,12 +39,12 @@ Features:
 * [USB Gamepad](https://en.wikipedia.org/wiki/Gamepad)
 * [USB XBOX 360 Controller](https://en.wikipedia.org/wiki/Xbox_360_controller)
 * [Dualshock 2 Controller Gamepad](https://en.wikipedia.org/wiki/DualShock) for [MiSTeryShield20k / MiSTeryShield20kPico](https://github.com/harbaum/MiSTeryNano/tree/main/board/misteryshield20k/README.md) via spare [pinheader](/board/misteryshield20k_ds2_adapter/misteryshield20k_ds2_adapter_cable.md)
-* [USB Mouse](https://en.wikipedia.org/wiki/Computer_mouse)
+* [USB Mouse](https://en.wikipedia.org/wiki/Computer_mouse) as AppleMouse or as Joystick
 * Disk loading via OSD. supported formats: **.NIB**
 * HDD loading via OSD. supported formats: **.HDV** (raw ProDOS partition images, 32MB)
 * Selectable 6502 or 65C02 CPU
 * Joystick support (analog proportional)
-* Mouse card in slot 5
+* Mouse card in slot 5 (AppleMouse)
 * Scanlines
 * Monitor type: Color, amber, green and black&white
 * Selection of color palette (NTSC //e, Apple IIgs, AppleWin, Custom)
@@ -51,15 +52,12 @@ Features:
 * Super Serial Card (SSC) in slot 2
 * 64K base + 64K auxilary RAM with 80 column and double hi-res support
 * Mockingboard model A (two AY-3-8913 chips for six audio channels) in slot 4
-* Video ROM Switch (US /UK)
+* Video ROM Switch (US /local UK)
 * Loadable 8K custom Video ROM (US / local)
 * SSC configuartion
-* Tape loading via the UART RX pin
+* Tape loading via the UART RX pin (ADT Pro)
 * Selectable mixed mode text color artifacts
 * FPGA Companion WIFI modem via SSC
-
-Planned features:
-* Tang Mega 138k Pro, Primer 25k support
 
 <img src="./.assets/apple2.png" alt="image" width="80%" height="auto">
 
@@ -74,6 +72,10 @@ See [Tang Console 60K NEO](TANG_CONSOLE_60K.md)
 ## Tang Mega 60k NEO
 
 See [Tang Mega 60K NEO](TANG_MEGA_60K.md)
+
+## Tang Mega 138K Pro
+
+See [Tang Mega 138K Pro](TANG_MEGA_138K.md)
 
 ## Installation
 
@@ -183,15 +185,19 @@ Dualshock 2 Gamepad Stick as Joystick. OSD: **DS #1** or **DS #2**<br>
 > TN20k: You have to select OSD "DS2 **#2** Joy" for a ``MiSTeryShield20k`` configuration.  
 > TN20k: You have to select OSD "DS2 **#1** Joy" if you use the ``Sipeed Joy to DIP`` adapter.  
 
+or
+Mouse. OSD: **Mouse**  
+USB Mouse as Joystick.
+
 ## LED UI
 
 | LED | function         |TN9K  |TN20K |TP20K  |TP25K  |TM60K   |TM138k|Console60k|
 | --- |        -         |-     |-     |-      | -     | -      | -    |-         |
-| 0   | FDD1 activity    |-     |x     |-      | -     | x      | -    |x         |
-| 1   | FDD2 activity    |-     |x     |-      | -     | x      | -    |x         |
-| 2   | FDD1 mounted     |-     |x     |-      | -     | -      | -    |-         |
-| 3   | FDD2 mounted     |-     |x     |-      | -     | -      | -    |-         |
-| 4   | HDD mounted      |-     |x     |-      | -     | -      | -    |-         |
+| 0   | FDD1 activity    |-     |x     |-      | -     | x      | x    |x         |
+| 1   | FDD2 activity    |-     |x     |-      | -     | x      | x    |x         |
+| 2   | FDD1 mounted     |-     |x     |-      | -     | -      | x    |-         |
+| 3   | FDD2 mounted     |-     |x     |-      | -     | -      | x    |-         |
+| 4   | HDD mounted      |-     |x     |-      | -     | -      | x    |-         |
 | 5   | unused           |-     |x     |-      | -     | -      | -    |-         |
 
 
