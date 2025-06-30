@@ -47,9 +47,9 @@ entity nanoapple2 is
     lcd_vs      : out std_logic; -- lcd vertical synchronization        
     lcd_de      : out std_logic; -- lcd data enable     
     lcd_bl      : out std_logic; -- lcd backlight control
-    lcd_r       : out std_logic_vector(7 downto 0);  -- lcd red
-    lcd_g       : out std_logic_vector(7 downto 0);  -- lcd green
-    lcd_b       : out std_logic_vector(7 downto 0);  -- lcd blue
+    lcd_r       : out std_logic_vector(5 downto 0);  -- lcd red
+    lcd_g       : out std_logic_vector(5 downto 0);  -- lcd green
+    lcd_b       : out std_logic_vector(5 downto 0);  -- lcd blue
     -- audio
     hp_bck      : out std_logic;
     hp_ws       : out std_logic;
@@ -1135,9 +1135,9 @@ port map(
       lcd_hs_n => lcd_hs,
       lcd_vs_n => lcd_vs,
       lcd_de   => lcd_de,
-      lcd_r    => lcd_r,
-      lcd_g    => lcd_g,
-      lcd_b    => lcd_b,
+      lcd_r(7 downto 2) => lcd_r,
+      lcd_g(7 downto 2) => lcd_g,
+      lcd_b(7 downto 2) => lcd_b,
       lcd_bl   => lcd_bl,
 
       hp_bck   => hp_bck,

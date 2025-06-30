@@ -47,7 +47,7 @@
  "MULTIBOOT_MODE" : "Normal",
  "MULTIBOOT_SPI_FLASH_ADDRESS" : "000000",
  "MULTIJUMP_ADDRESS_WIDTH" : "24",
- "MULTIJUMP_MODE" : "",
+ "MULTIJUMP_MODE" : "Normal",
  "MULTIJUMP_SPI_FLASH_ADDRESS" : "000000",
  "Multi_Boot" : false,
  "OUTPUT_BASE_NAME" : "nanoapple2_tm138kpro",
