@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------
---  Nano Apple IIe for Tang Console 60k / GW5AT-60B
+--  Nano Apple IIe for Tang Mega 138k Pro / GW5AST-LV138
 --  2025 Stefan Voss
 --  based on the work of many others
 -------------------------------------------------------------------------
@@ -32,7 +32,7 @@ entity nanoapple2 is
     clk_in      : in std_logic;
     s2_reset    : in std_logic; -- S2 button
     user        : in std_logic; -- S1 button
-    leds_n      : out std_logic_vector(2 downto 0);
+    leds_n      : out std_logic_vector(5 downto 0);
     -- onboard USB-C Tang BL616 UART
     uart_rx     : in std_logic;
     uart_tx     : out std_logic;
@@ -60,12 +60,12 @@ entity nanoapple2 is
     tmds_clk_p  : out std_logic;
     tmds_d_n    : out std_logic_vector( 2 downto 0);
     tmds_d_p    : out std_logic_vector( 2 downto 0);
-    hpd_en      : out std_logic;
-    pwr_sav     : out std_logic;
     -- sd interface
     sd_clk      : out std_logic;
     sd_cmd      : inout std_logic;
     sd_dat      : inout std_logic_vector(3 downto 0);
+    -- multicolor LED
+    ws2812       : out std_logic;
     -- MiSTer SDRAM module
     O_sdram_clk     : out std_logic;
     O_sdram_cs_n    : out std_logic; -- chip select
@@ -429,7 +429,7 @@ begin
     end if;
   end process;
   
-pll_inst: entity work.Gowin_PLL_60k_ntsc
+pll_inst: entity work.Gowin_PLL_138kpro_ntsc
 port map (
     lock    => pll_locked,
     clkout0 => clk_pixel_x5,  -- 143M
@@ -444,7 +444,7 @@ led_ws2812: entity work.ws2812
   (
    clk    => clk_sys,
    color  => ws2812_color,
-   data   => open  --ws2812
+   data   => ws2812
   );
 
 gamepad_p1: entity work.dualshock2
@@ -852,10 +852,13 @@ sdcard_interface2: entity work.floppy_track port map (
     TRACK2_BUSY    => TRACK2_RAM_BUSY
     );
 
-  leds_n(2 downto 0) <= not leds(2 downto 0);
-  leds(0) <= '0';
-  leds(1) <= '0';
-  leds(2) <= D1_ACTIVE or D2_ACTIVE;
+  leds_n <= not leds;
+  leds(0) <= D1_ACTIVE;
+  leds(1) <= D2_ACTIVE;
+  leds(2) <= DISK_MOUNT(0);
+  leds(3) <= DISK_MOUNT(1);
+  leds(4) <= hdd_mounted;
+  leds(5) <= '0';
 
   mb : entity  work.mockingboard port map (
       CLK_14M      => clk_core,
@@ -1093,7 +1096,7 @@ audio_sp(9 downto 8) <= (others => '0');
 video_inst: entity work.video
 generic map
 (
-  STEREO  => false
+  STEREO  => true
 )
 port map(
       pll_lock     => pll_locked, 
@@ -1143,9 +1146,6 @@ port map(
       hp_din   => hp_din,
       pa_en    => pa_en
       );
-
-hpd_en <= '1';
-pwr_sav <= '1';
 
 spi_io_din  <= m0s(1);
 spi_io_ss   <= m0s(2);

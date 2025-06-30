@@ -7,13 +7,18 @@ echo ============ build nano 20k  ===============
 echo.
 %GWSH% build_tn20k.tcl
 echo.
-echo ============ build console 60k LCD ===============
+echo ============ build console 60k ===============
 echo.
 %GWSH% build_tc60k.tcl
 echo.
 echo ============ build tm 60k ===============
 echo.
 %GWSH% build_tm60k.tcl
+echo.
+echo.
+echo ============ build tm 138kpro ===============
+echo.
+%GWSH% build_tm138kpro.tcl
 echo.
 
 echo "done."
