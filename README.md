@@ -168,8 +168,6 @@ invoke by F12 keypress
 
 ## Gamecontrol support
 
-![controller](\.assets/controller-layout.png)  
-
 USB Gamepad Stick as Joystick (no DPAD). OSD: **USB #1** or **USB #2**  
 ```Button A and B``` Buttons as Trigger:  
 
@@ -217,6 +215,12 @@ Circuit with Keyboard can be powered by Tang USB-C connector from PC or a Power 
 
 Source code can be synthesized, fitted and programmed with GOWIN IDE Windows or Linux.  
 Alternatively use the command line build script **gw_sh.exe** build_tn20k.tcl  
+
+## SSC RS232 Serial Interface WIFI Modem
+
+Have a look: [Wiki WIFI Modem](https://github.com/harbaum/FPGA-Companion/wiki/AT-Wi%E2%80%90Fi-modem)  
+
+Connect to you WIFI AP and have a try: ``ATD`` [bbs.retrocampus.com:23](https://bbs.retrocampus.com) or just have a look at [telnetbbsguide](https://www.telnetbbsguide.com/bbs/software/image-bbs) and choose as you like.  
 
 ## HW circuit considerations
 
