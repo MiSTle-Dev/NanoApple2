@@ -139,7 +139,8 @@ signal a_ram: unsigned(15 downto 0);
 signal r : unsigned(7 downto 0);
 signal g : unsigned(7 downto 0);
 signal b : unsigned(7 downto 0);
-signal blank : std_logic;
+signal hblank : std_logic;
+signal vblank : std_logic;
 signal hsync : std_logic;
 signal vsync : std_logic;
 signal ram_we : std_logic;
@@ -295,7 +296,7 @@ signal cpu_wait_hddD      : std_logic := '0';
 signal cpu_wait_hddD2     : std_logic := '0';
 signal hdd_read_pending   : std_logic := '0';
 signal hdd_write_pending  : std_logic := '0';
-signal state              : std_logic := '0';
+signal state              : std_logic_vector(1 downto 0) := "00";
 signal old_ack            : std_logic := '0';
 signal hdd_readD2, hdd_readD  : std_logic;
 signal hdd_writeD2, hdd_writeD  : std_logic;
@@ -325,7 +326,8 @@ signal system_baudrate    : std_logic_vector(3 downto 0);
 signal system_sscirq      : std_logic;
 signal system_lfcr        : std_logic;
 signal loader_busy        : std_logic;
-signal load_rom           : std_logic;
+signal load_rom           : std_logic := '0';
+signal load_palette       : std_logic := '0';
 signal ioctl_download     : std_logic := '0';
 signal ioctl_load_addr    : std_logic_vector(22 downto 0);
 signal ioctl_wr           : std_logic;
@@ -689,21 +691,29 @@ dram_inst: entity work.sdram port map(
     ioctl_clk      => clk_sys
     );
 
-  tv : entity work.tv_controller port map (
-    CLK_14M    => clk_core,
-    VIDEO      => VIDEO,
-    COLOR_LINE => COLOR_LINE_CONTROL,
-    SCREEN_MODE => system_monitor,   -- 00: Color, 01: B&W, 10: Green, 11: Amber
+  vga_controller_inst : entity work.vga_controller port map (
+    CLK_14M       => clk_core,
+    VIDEO         => VIDEO,
+    COLOR_LINE    => COLOR_LINE_CONTROL,
+    SCREEN_MODE   => system_monitor, -- 00: Color, 01: B&W, 10: Green, 11: Amber
     COLOR_PALETTE => system_palette, -- 00: Original, 01: //gs, 02: //e, 03: //e alternative
-    HBL        => HBL,
-    VBL        => VBL,
-    VGA_CLK    => open,
-    VGA_HS     => hsync,
-    VGA_VS     => vsync,
-    VGA_BLANK  => blank,
-    VGA_R      => r,
-    VGA_G      => g,
-    VGA_B      => b
+    HBL           => HBL,
+    VBL           => VBL,
+    VGA_HS        => hsync,
+    VGA_VS        => vsync,
+		VGA_HBL       => hblank,
+		VGA_VBL       => vblank,
+    VGA_R         => r,
+    VGA_G         => g,
+    VGA_B         => b,
+    -- load different palettes
+    ioctl_addr    => "00" & ioctl_addr,
+    ioctl_data    => ioctl_data,
+    ioctl_index   => 6x"00" & load_palette & '0',
+    ioctl_download=> ioctl_download,
+    ioctl_wr      => ioctl_wr,
+    ioctl_wait    => open,
+    ioctl_clk     => clk_sys
     );
 
   keyboard : entity work.keyboard 
@@ -726,10 +736,10 @@ dram_inst: entity work.sdram port map(
     );
 
 SD_LBA3 <= std_logic_vector( x"0000" & sector);
-sd_lba <= SD_LBA4 when (sd_rd(3) or sd_wr(3)) = '1' else SD_LBA3 when (sd_rd(2) or sd_wr(2)) = '1' else SD_LBA2 when (sd_rd(1) or sd_wr(1)) = '1' else SD_LBA1;
+sd_lba <= SD_LBA4 when (sd_rd(4) or sd_wr(4) or sd_rd(3) or sd_wr(3)) = '1' else SD_LBA3 when (sd_rd(2) or sd_wr(2)) = '1' else SD_LBA2 when (sd_rd(1) or sd_wr(1)) = '1' else SD_LBA1;
 sd_wr_data <= SD_DATA_IN3 when (sd_rd(2) or sd_wr(2)) = '1' else SD_DATA_IN2 when (sd_rd(1) or sd_wr(1)) = '1' else SD_DATA_IN1;
-sd_rd(5 downto 4) <= "00";
-sd_wr(5 downto 4) <= "00";
+sd_rd(5) <= '0';
+sd_wr(5) <= '0';
 
 process(clk_sys, pll_locked)
 variable reset_cnt : integer range 0 to 2147483647;
@@ -923,7 +933,7 @@ end process;
 process(clk_sys, dd_reset)
   begin
     if dd_reset = '1' then
-        state <= '0';
+        state <= "00";
         cpu_wait_hddD2 <= '0';
         hdd_read_pending <= '0';
         hdd_write_pending <= '0';
@@ -939,21 +949,27 @@ process(clk_sys, dd_reset)
     	hdd_read_pending <= '1' when hdd_read_pending = '1' or (hdd_readD = '0' and hdd_readD2 = '1') else '0';
     	hdd_write_pending <= '1' when hdd_write_pending = '1' or (hdd_writeD = '0' and hdd_writeD2 = '1') else '0';
 
-      if state = '0' then
+      if state = "00" then
+        if loader_busy = '0' then
+          state <= "01";
+        else 
+          state <= "00";
+        end if;
+      elsif state = "01" then
         if hdd_read_pending or hdd_write_pending then
-          state <= '1';
+          state <= "10";
           sd_rd(2) <= hdd_read_pending;
           sd_wr(2) <= hdd_write_pending;
           cpu_wait_hddD2 <= '1';
         end if;
-      elsif state = '1' then
+      elsif state = "10" then
         if old_ack = '0' and sd_busy = '1' then
           hdd_read_pending <= '0';
           hdd_write_pending <= '0';
           sd_rd(2) <= '0';
           sd_wr(2) <= '0';
         elsif old_ack = '1' and sd_busy = '0' then
-          state <= '0';
+          state <= "00";
           cpu_wait_hddD2 <= '0';
         end if;
       end if;
@@ -1116,8 +1132,8 @@ port map(
       audio_div    => (others => '0'),
       
       ntscmode  => system_video_std,
-      vb_in     => not vsync,
-      hb_in     => blank,
+      vb_in     => vblank,
+      hb_in     => hblank,
       hs_in_n   => hsync,
       vs_in_n   => vsync,
 
@@ -1326,8 +1342,8 @@ generic map (
     reset             => not pll_locked,
   
     sd_lba            => SD_LBA4,
-    sd_rd             => sd_rd(3),
-    sd_wr             => sd_wr(3),
+    sd_rd             => sd_rd(4 downto 3),
+    sd_wr             => sd_wr(4 downto 3),
     sd_busy           => sd_busy,
     sd_done           => sd_done,
   
@@ -1335,9 +1351,10 @@ generic map (
     sd_rd_data        => sd_rd_data,
     sd_rd_byte_strobe => sd_rd_byte_strobe,
   
-    sd_img_mounted    => sd_img_mounted(3),
+    sd_img_mounted    => sd_img_mounted(4 downto 3),
     loader_busy       => loader_busy,
     load_rom          => load_rom,
+    load_palette      => load_palette,
     sd_img_size       => sd_img_size,
   
     ioctl_download    => ioctl_download,

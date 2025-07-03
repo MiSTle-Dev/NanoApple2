@@ -64,15 +64,16 @@
         <File path="src/gowin_prom/gowin_prom_apple2.vhd" type="file.vhdl" enable="1"/>
         <File path="src/gowin_prom/gowin_prom_key.vhd" type="file.vhdl" enable="1"/>
         <File path="src/gowin_sdpb/gowin_sdpb_8k_gw5a.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/gowin_sdpb/gowin_sdpb_palette_gw5a.vhd" type="file.vhdl" enable="1"/>
         <File path="src/hdd.vhd" type="file.vhdl" enable="1"/>
         <File path="src/hdd_rom.vhd" type="file.vhdl" enable="1"/>
         <File path="src/keyboard.vhd" type="file.vhdl" enable="1"/>
         <File path="src/ssc.vhd" type="file.vhdl" enable="1"/>
         <File path="src/ssc_rom.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/tang/console60k/vga_controller.vhd" type="file.vhdl" enable="1"/>
         <File path="src/tang/console60k/video_generator.vhd" type="file.vhdl" enable="1"/>
         <File path="src/tang/mega138kpro/nanoapple2.vhd" type="file.vhdl" enable="1"/>
         <File path="src/timing_generator.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tv_controller.vhd" type="file.vhdl" enable="1"/>
         <File path="src/tang/mega138kpro/nanoapple2_tm138kpro.cst" type="file.cst" enable="1"/>
         <File path="src/tang/mega138kpro/nanoapple2_tm138kpro.sdc" type="file.sdc" enable="1"/>
     </FileList>

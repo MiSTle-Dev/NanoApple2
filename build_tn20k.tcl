@@ -63,7 +63,8 @@ add_file src/ssc.vhd
 add_file src/ssc_rom.vhd
 add_file src/tang/nano20k/nanoapple2.vhd
 add_file src/timing_generator.vhd
-add_file src/tv_controller.vhd
+add_file src/vga_controller.vhd
+add_file src/gowin_sdpb/gowin_sdpb_palette.vhd
 add_file src/video_generator.vhd
 add_file src/tang/nano20k/nanoapple2.cst
 add_file src/tang/nano20k/nanoapple2.sdc

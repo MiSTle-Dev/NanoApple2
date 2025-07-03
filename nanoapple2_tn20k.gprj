@@ -64,6 +64,7 @@
         <File path="src/gowin_prom/gowin_prom_key.vhd" type="file.vhdl" enable="1"/>
         <File path="src/gowin_rpll/gowin_rpll_tn20k.vhd" type="file.vhdl" enable="1"/>
         <File path="src/gowin_sdpb/gowin_sdpb_8k.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/gowin_sdpb/gowin_sdpb_palette.vhd" type="file.vhdl" enable="1"/>
         <File path="src/hdd.vhd" type="file.vhdl" enable="1"/>
         <File path="src/hdd_rom.vhd" type="file.vhdl" enable="1"/>
         <File path="src/keyboard.vhd" type="file.vhdl" enable="1"/>
@@ -71,7 +72,7 @@
         <File path="src/ssc_rom.vhd" type="file.vhdl" enable="1"/>
         <File path="src/tang/nano20k/nanoapple2.vhd" type="file.vhdl" enable="1"/>
         <File path="src/timing_generator.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tv_controller.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/vga_controller.vhd" type="file.vhdl" enable="1"/>
         <File path="src/video_generator.vhd" type="file.vhdl" enable="1"/>
         <File path="src/tang/nano20k/nanoapple2.cst" type="file.cst" enable="1"/>
         <File path="src/tang/nano20k/nanoapple2.sdc" type="file.sdc" enable="1"/>

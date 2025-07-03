@@ -60,8 +60,8 @@ always @(posedge clk) begin
    // HDMI re-adjusts its counters to the start of the visible screen area
    vreset <= 1'b0;
    if( 
-       (hcnt == 181 && vcnt == 27 && changed && mode == 2'd1) ||
-       (hcnt == 181 && vcnt == 27 && changed && mode == 2'd0) ) begin
+       (hcnt == 130 && vcnt == 27 && changed && mode == 2'd1) ||
+       (hcnt == 130 && vcnt == 27 && changed && mode == 2'd0) ) begin
        vreset <= 1'b1;
        changed <= 1'b0;
    end
