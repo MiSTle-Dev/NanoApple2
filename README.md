@@ -27,7 +27,7 @@ and for the Raspberry PiPico (RP2040 µC) there is a:
 * Optional case (upcoming)  
 
 The project based on an Apple ][+ FPGA implementation.  
-Original for the DE2: http://www1.cs.columbia.edu/~sedwards/apple2fpga/  
+Original for the DE2: https://www.cs.columbia.edu/~sedwards/apple2fpga/  
 Port for the MiST: http://ws0.org/tag/apple2/  
 
 All HID, SDcard and µC firmware by [Till Harbaum](http://www.harbaum.org/till/mist)  
@@ -48,6 +48,7 @@ Features:
 * Scanlines
 * Monitor type: Color, amber, green and black&white
 * Selection of color palette (NTSC //e, Apple IIgs, AppleWin, Custom)
+* Loadable Custom Color Palette
 * Language card in slot 0
 * Super Serial Card (SSC) in slot 2
 * 64K base + 64K auxilary RAM with 80 column and double hi-res support
@@ -227,7 +228,7 @@ Connect to you WIFI AP and have a try: ``ATD`` [bbs.retrocampus.com:23](https://
 **Pinmap TN20k Interfaces**  
 
  Sipeed M0S Dock and DualShock Gamepad connection.  
-![wiring](\.assets/wiring_spi.png)
+![wiring](\.assets/wiring_a2.png)
 
 **Pinmap Dualshock 2 Controller Interface**  
 

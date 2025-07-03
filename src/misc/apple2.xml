@@ -73,7 +73,7 @@
  <listentry label="NTSC //e" value="0"/>
  <listentry label="IIgs" value="1"/>
  <listentry label="AppleWin" value="2"/>
- <listentry label="apple2fpga" value="3"/>
+ <listentry label="Custom" value="3"/>
       </list>
       <list label="SSC S2:" id="U" default="1" action="cold_reset_hide">
  <listentry label="Off" value="0"/>
@@ -154,6 +154,7 @@
       <fileselector label="Disk 1:" ext="nib" index="1" default="disk1.nib"/>
       <fileselector label="HDD:" ext="hdv" index="2" default="hdd.hdv"/>
       <fileselector label="Load Video ROM:" ext="bin" index="3"/>
+      <fileselector label="Load Palette:" ext="a2p" index="4"/>
       <list label="Disk prot.:" id="P" default="0">
 	<listentry label="None" value="0"/>
 	<listentry label="Disk 0" value="1"/>
