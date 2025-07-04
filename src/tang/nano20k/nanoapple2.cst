@@ -18,6 +18,8 @@ IO_LOC "tmds_d_p[0]" 35,36;
 IO_PORT "tmds_d_p[0]" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
 IO_LOC "tmds_clk_p" 33,34;
 IO_PORT "tmds_clk_p" PULL_MODE=NONE DRIVE=8 BANK_VCCIO=3.3;
+IO_LOC  "hpd_en"  26;
+IO_PORT "hpd_en"  PULL_MODE=NONE BANK_VCCIO=3.3;
 
 IO_LOC "leds_n[5]" 20;
 IO_PORT "leds_n[5]" IO_TYPE=LVCMOS33 PULL_MODE=UP;
