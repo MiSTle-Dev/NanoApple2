@@ -26,8 +26,8 @@ module sdram
 (
 	output            SDRAM_CLK,
 	inout  reg [31:0] SDRAM_DQ,   // 16 bit bidirectional data bus
-	output reg [10:0] SDRAM_A,    // 13 bit multiplexed address bus
-	output      [3:0] SD_DQM,
+	output reg [10:0] SDRAM_A,    // 11 bit multiplexed address bus
+	output reg  [3:0] SD_DQM,
 	output reg  [1:0] SDRAM_BA,   // two banks
 	output            SDRAM_nCS,  // a single chip select
 	output reg        SDRAM_nWE,  // write enable
@@ -37,21 +37,22 @@ module sdram
 
 	// cpu/chipset interface
 	input             init,			// init signal after FPGA config to initialize RAM
-	input             clk,			// sdram is accessed at up to 128MHz
+	input             clk,			// sdram clk
 	input             clkref,		// reference clock to sync to
 	
 	input       [7:0] din,			// data input from chipset/cpu
 	output     [15:0] dout,			// data output to chipset/cpu
-	input      [22:0] addr,        // 23 bit byte address
-	input             oe,         // cpu/chipset requests read
-	input             we,         // cpu/chipset requests write
+	input      [21:0] addr,         // 22 bit byte address
+	input             oe,           // cpu/chipset requests read
+	input             we,           // cpu/chipset requests write
 	input             aux
 );
 
-assign SDRAM_CLK = clk;
+reg [1:0] ds;
+assign SDRAM_CLK = ~clk;
 assign SDRAM_CKE = 1;
 assign SDRAM_nCS = 0;
-assign SD_DQM = (aux) == 1'b0 ? 4'b0011:4'b1100;
+assign ds = aux?2'b01:2'b10;
 
 // no burst configured
 localparam RASCAS_DELAY   = 3'd3;   // tRCD=20ns
@@ -69,7 +70,7 @@ localparam STATE_CONT  = STATE_START  + RASCAS_DELAY; // 4 command can be contin
 localparam STATE_LAST  = 3'd7;   // last state in cycle
 
 reg  [2:0] q;
-reg [22:0] a;
+reg [21:0] a;
 reg        wr;
 reg        ram_req=0;
 reg [31:0] data;
@@ -139,13 +140,16 @@ localparam CMD_PRECHARGE       = 3'b010;
 localparam CMD_AUTO_REFRESH    = 3'b001;
 localparam CMD_LOAD_MODE       = 3'b000;
 
-assign dout = (aux) == 1'b0 ? data[31:16]:data[15:0];
+assign dout = a[0]?data[15:0]:data[31:16];
 
 assign SDRAM_DQ = (ram_req == 1'b1 && wr == 1'b1 && mode == MODE_NORMAL && q == STATE_CONT) ? {din, din, din, din} : 32'bzzzz_zzzz_zzzz_zzzz_zzzz_zzzz_zzzz_zzzz;
 
 // SDRAM state machines
 always @(posedge clk) begin
-	if(q == STATE_START) SDRAM_BA <= (mode == MODE_NORMAL) ? a[20:19] : 2'b00;
+	if(q == STATE_START) begin 
+		SDRAM_BA <= (mode == MODE_NORMAL) ? a[21:20] : 2'b00;
+		SD_DQM <= (!we)?4'b0000:a[0]?{2'b11,ds}:{ds,2'b11};
+	end
 
 	casex({ram_req,wr,mode,q})
 		{2'b1X, MODE_NORMAL, STATE_START}: {SDRAM_nRAS, SDRAM_nCAS, SDRAM_nWE} <= CMD_ACTIVE;
@@ -161,8 +165,8 @@ always @(posedge clk) begin
 	endcase
 
 	casex({ram_req,mode,q})
-		{1'b1,  MODE_NORMAL, STATE_START}: {SDRAM_A} <= {a[18:8]};
-		{1'b1,  MODE_NORMAL, STATE_CONT }: SDRAM_A <= {3'b100, a[7:0]};
+		{1'b1,  MODE_NORMAL, STATE_START}: SDRAM_A <= {a[19:9]};
+		{1'b1,  MODE_NORMAL, STATE_CONT }: SDRAM_A <= {3'b100, a[8:1]};
 		// init
 		{1'bX,     MODE_LDM, STATE_START}: SDRAM_A <= MODE;
 		{1'bX,     MODE_PRE, STATE_START}: SDRAM_A <= 11'b10000000000;

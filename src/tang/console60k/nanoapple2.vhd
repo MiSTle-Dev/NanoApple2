@@ -631,9 +631,9 @@ joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
         MOUSE_DO when MOUSE_OE = '1' and system_mouse = '1' else
         DISK_DO;
 
-  irq_n <= '1' when (psg_irq_n = '1' or system_mb = '0')
-                and (mouse_irq_n = '1' or system_mouse = '0')
-                and (ssc_irq_n = '1' or system_sscirq = '0' or system_ssc = '0') else '0';
+  irq_n <= '0' when (psg_irq_n = '0' and system_mb = '1')
+                or (mouse_irq_n = '0' and system_mouse = '1')
+                or (ssc_irq_n = '0' and system_ssc = '1' and system_sscirq = '1') else '1';
 
   core : entity work.apple2 port map (
     CLK_14M        => clk_core,
@@ -1127,8 +1127,8 @@ port map(
       g_in      => g(7 downto 4),
       b_in      => b(7 downto 4),
 
-      audio_l => ("0" & (psg_audio_l + audio_sp) & 5x"00"),
-      audio_r => ("0" & (psg_audio_r + audio_sp) & 5x"00"),
+      audio_l => ("00" & (psg_audio_l + audio_sp) & 4x"00"),
+      audio_r => ("00" & (psg_audio_r + audio_sp) & 4x"00"),
       osd_status => open,
 
       mcu_start => mcu_start,
