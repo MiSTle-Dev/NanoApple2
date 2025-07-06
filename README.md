@@ -9,8 +9,6 @@ The Nano Apple IIe is a port of both [MiSTer](https://github.com/MiSTer-devel/Ap
 | [Tang Mega 60k NEO](https://wiki.sipeed.com/hardware/en/tang/tang-mega-60k/mega-60k.html)|[GW5AT-60](https://www.gowinsemi.com/en/product/detail/60/)| HDMI / LCD| |
 | [Tang Mega 138k Pro](https://wiki.sipeed.com/hardware/en/tang/tang-mega-138k/mega-138k-pro.html)|[GW5AST-138](https://www.gowinsemi.com/en/product/detail/60/) |HDMI / LCD| |
 
-**The project is still a work in progress. Please report findings as issue.**  
-
 This project relies on an external µC being connected to the Tang Nano 20K. You can use a [M0S Dock BL616](https://wiki.sipeed.com/hardware/en/maixzero/m0s/m0s.html), [Raspberry Pi Pico (W)](https://www.raspberrypi.com/documentation/microcontrollers/pico-series.html) or [esp32-s2](https://www.espressif.com/en/products/socs/esp32-s2)/[s3](https://www.espressif.com/en/products/socs/esp32-s3) and use the [FPGA companion firmware](http://github.com/harbaum/FPGA-Companion). Basically a µC acts as USB host for USB devices and as an OSD controller using a [SPI communication protocol](https://github.com/harbaum/MiSTeryNano/blob/main/SPI.md).
 
 For the [M0S Dock BL616](https://wiki.sipeed.com/hardware/en/maixzero/m0s/m0s.html) there is a:
@@ -230,7 +228,7 @@ Connect to you WIFI AP and have a try: ``ATD`` [bbs.retrocampus.com:23](https://
  Sipeed M0S Dock and DualShock Gamepad connection.  
 ![wiring](\.assets/wiring_a2.png)
 
-**Pinmap Dualshock 2 Controller Interface**  
+**Pinmap Dualshock 2 Controller Interface (Port #DS1)**  
 
 <img src="./.assets/controller-pinout.jpg" alt="image" width="30%" height="auto">
 
