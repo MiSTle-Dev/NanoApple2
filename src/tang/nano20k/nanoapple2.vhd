@@ -624,12 +624,12 @@ dram_inst: entity work.sdram port map(
     init       => not pll_locked,-- init signal after FPGA config to initialize RAM
     clk        => clk_sys,
     clkref     => CLK_2M,
-    din        => ram_di,          -- data input from chipset/cpu
-    dout       => DO,     -- data output to chipset/cpu
-    addr       => ram_addr(21 downto 0) & '0',
-    oe         => not ram_we,            -- cpu/chipset requests read/wrie
-    we         => ram_we,            -- cpu/chipset requests write
-    aux        => aux
+    din        => ram_di,          -- 8bit data input from chipset/cpu
+    dout       => DO,              -- Data from RAM (lo byte: MAIN RAM, hi byte: AUX RAM)
+    addr       => ram_addr(21 downto 0),
+    oe         => not ram_we,      -- cpu/chipset requests read/wrie
+    we         => ram_we,          -- cpu/chipset requests write
+    aux        => aux              -- Write to MAIN or AUX RAM
   );
 
   -- Simulate power up on cold reset to go to the disk boot routine
