@@ -6,6 +6,17 @@
     <Device name="GW2AR-18C" pn="GW2AR-LV18QN88C8/I7">gw2ar18c-000</Device>
     <FileList>
         <File path="mockingboard/YM2149.sv" type="file.verilog" enable="1"/>
+        <File path="mockingboard/jt49/filter/jt49_dcrm.v" type="file.verilog" enable="1"/>
+        <File path="mockingboard/jt49/filter/jt49_dcrm2.v" type="file.verilog" enable="1"/>
+        <File path="mockingboard/jt49/filter/jt49_dly.v" type="file.verilog" enable="1"/>
+        <File path="mockingboard/jt49/filter/jt49_mave.v" type="file.verilog" enable="1"/>
+        <File path="mockingboard/jt49/jt49.v" type="file.verilog" enable="1"/>
+        <File path="mockingboard/jt49/jt49_bus.v" type="file.verilog" enable="1"/>
+        <File path="mockingboard/jt49/jt49_cen.v" type="file.verilog" enable="1"/>
+        <File path="mockingboard/jt49/jt49_div.v" type="file.verilog" enable="1"/>
+        <File path="mockingboard/jt49/jt49_eg.v" type="file.verilog" enable="1"/>
+        <File path="mockingboard/jt49/jt49_exp.v" type="file.verilog" enable="1"/>
+        <File path="mockingboard/jt49/jt49_noise.v" type="file.verilog" enable="1"/>
         <File path="mouse/jt6805/jt6805.v" type="file.verilog" enable="1"/>
         <File path="mouse/jt6805/jt6805_alu.v" type="file.verilog" enable="1"/>
         <File path="mouse/jt6805/jt6805_ctrl.v" type="file.verilog" enable="1"/>

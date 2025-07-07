@@ -67,6 +67,11 @@ entity MOCKINGBOARD is
   signal PSG_EN   : std_logic;
   signal VIA_CE_F, VIA_CE_R, PHASE_ZERO_D : std_logic;
 
+  signal ym_audio_out_l_signed : unsigned(9 downto 0);
+  signal ym_audio_out_r_signed : unsigned(9 downto 0);
+  signal ym_audio_out_l        : std_logic_vector(9 downto 0);
+  signal ym_audio_out_r        : std_logic_vector(9 downto 0);
+
   component YM2149
   port (
     CLK         : in  std_logic;
@@ -140,32 +145,60 @@ begin
       irq         => lirq
       );
 
-  psg_left: entity work.YM2149
-  port map (
-    CLK         => CLK_14M,
-    CE          => PSG_EN and I_ENA_H,
-    RESET       => not o_pb_l(2),
-    BDIR        => o_pb_l(1),
-    BC          => o_pb_l(0),
-    DI          => i_psg_l,
-    DO          => o_psg_l,
-    CHANNEL_A   => o_psg_al,
-    CHANNEL_B   => o_psg_bl,
-    CHANNEL_C   => o_psg_cl,
+--  psg_left: entity work.YM2149
+--  port map (
+--    CLK         => CLK_14M,
+--    CE          => PSG_EN and I_ENA_H,
+--    RESET       => not o_pb_l(2),
+--    BDIR        => o_pb_l(1),
+--    BC          => o_pb_l(0),
+--    DI          => i_psg_l,
+--    DO          => o_psg_l,
+--    CHANNEL_A   => o_psg_al,
+--    CHANNEL_B   => o_psg_bl,
+--    CHANNEL_C   => o_psg_cl,
 
-    SEL         => '0',
-    MODE        => '0',
+--    SEL         => '0',
+--    MODE        => '0',
 
-    ACTIVE      => open,
+--    ACTIVE      => open,
 
-    IOA_in      => (others => '0'),
-    IOA_out     => open,
+--    IOA_in      => (others => '0'),
+--    IOA_out     => open,
 
-    IOB_in      => (others => '0'),
-    IOB_out     => open
-    );
+--    IOB_in      => (others => '0'),
+--    IOB_out     => open
+--    );
 
-  O_AUDIO_L <= std_logic_vector(unsigned("00" & o_psg_al) + unsigned("00" & o_psg_bl) + unsigned("00" & o_psg_cl));
+psg_left: entity work.jt49_bus port map (
+ rst_n  => o_pb_l(2),
+ clk    => CLK_14M,
+ clk_en => PSG_EN and I_ENA_H,
+
+ bdir   => o_pb_l(1),
+ bc1    => o_pb_l(0),
+ din    => i_psg_l,
+ 
+ sel    => '0',
+ dout   => o_psg_l,
+ sound  => open, -- ym_audio_out_l, -- combined channel output
+ A      => o_psg_al,      -- linearised channel output
+ B      => o_psg_bl,
+ C      => o_psg_cl,
+ sample => open,
+ 
+ IOA_in  => (others => '0'),
+ IOA_out => open,
+ IOA_oe  => open,
+ 
+ IOB_in  => (others => '0'),
+ IOB_out => open,
+ IOB_oe  => open
+ );
+
+  ym_audio_out_l <= std_logic_vector(unsigned("00" & o_psg_al) + unsigned("00" & o_psg_bl) + unsigned("00" & o_psg_cl));
+  ym_audio_out_l_signed <= unsigned(ym_audio_out_l) - 10x"200";
+  O_AUDIO_L <= std_logic_vector(ym_audio_out_l_signed);
 
 -- Right Channel Combo
   m6522_right : entity work.via6522
@@ -203,32 +236,59 @@ begin
       irq         => rirq
       );
 
-  psg_right: entity work.YM2149
-  port map (
-    CLK         => CLK_14M,
-    CE          => PSG_EN and I_ENA_H,
-    RESET       => not o_pb_r(2),
-    BDIR        => o_pb_r(1),
-    BC          => o_pb_r(0),
-    DI          => i_psg_r,
-    DO          => o_psg_r,
-    CHANNEL_A   => o_psg_ar,
-    CHANNEL_B   => o_psg_br,
-    CHANNEL_C   => o_psg_cr,
+--  psg_right: entity work.YM2149
+--  port map (
+--    CLK         => CLK_14M,
+--    CE          => PSG_EN and I_ENA_H,
+--    RESET       => not o_pb_r(2),
+--    BDIR        => o_pb_r(1),
+--    BC          => o_pb_r(0),
+--    DI          => i_psg_r,
+--    DO          => o_psg_r,
+--    CHANNEL_A   => o_psg_ar,
+--    CHANNEL_B   => o_psg_br,
+--    CHANNEL_C   => o_psg_cr,
 
-    SEL         => '0',
-    MODE        => '0',
+--    SEL         => '0',
+--    MODE        => '0',
 
-    ACTIVE      => open,
+--    ACTIVE      => open,
 
-    IOA_in      => (others => '0'),
-    IOA_out     => open,
+--    IOA_in      => (others => '0'),
+--    IOA_out     => open,
 
-    IOB_in      => (others => '0'),
-    IOB_out     => open
-    );
+--    IOB_in      => (others => '0'),
+--    IOB_out     => open
+--    );
 
-  O_AUDIO_R <= std_logic_vector(unsigned("00" & o_psg_ar) + unsigned("00" & o_psg_br) + unsigned("00" & o_psg_cr));
+psg_right: entity work.jt49_bus port map (
+ rst_n  => o_pb_r(2),
+ clk    => CLK_14M,
+ clk_en => PSG_EN and I_ENA_H,
 
+ bdir   => o_pb_r(1),
+ bc1    => o_pb_r(0),
+ din    => i_psg_r,
+ 
+ sel    => '0',
+ dout   => o_psg_r,
+ sound  => open, -- ym_audio_out_r, -- combined channel output
+ A      => o_psg_ar,      -- linearised channel output
+ B      => o_psg_br,
+ C      => o_psg_cr,
+ sample => open,
+ 
+ IOA_in  => (others => '0'),
+ IOA_out => open,
+ IOA_oe  => open,
+ 
+ IOB_in  => (others => '0'),
+ IOB_out => open,
+ IOB_oe  => open
+ );
+ 
+  ym_audio_out_r <= std_logic_vector(unsigned("00" & o_psg_ar) + unsigned("00" & o_psg_br) + unsigned("00" & o_psg_cr));
+  ym_audio_out_r_signed <= unsigned(ym_audio_out_r) - 10x"200";
+  O_AUDIO_R <= std_logic_vector(ym_audio_out_r_signed);
 
 end architecture RTL;

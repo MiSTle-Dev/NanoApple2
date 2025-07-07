@@ -71,6 +71,17 @@ add_file src/gowin_sdpb/gowin_sdpb_8k_gw5a.vhd
 add_file src/uart6551/io_fifo.v
 add_file src/uart6551/uart_6551.v
 add_file src/gowin_sdpb/gowin_sdpb_palette_gw5a.vhd
+add_file mockingboard/jt49/filter/jt49_dcrm.v
+add_file mockingboard/jt49/filter/jt49_dcrm2.v
+add_file mockingboard/jt49/filter/jt49_dly.v
+add_file mockingboard/jt49/filter/jt49_mave.v
+add_file mockingboard/jt49/jt49.v
+add_file mockingboard/jt49/jt49_bus.v
+add_file mockingboard/jt49/jt49_cen.v
+add_file mockingboard/jt49/jt49_div.v
+add_file mockingboard/jt49/jt49_eg.v
+add_file mockingboard/jt49/jt49_exp.v
+add_file mockingboard/jt49/jt49_noise.v
 
 set_option -synthesis_tool gowinsynthesis
 set_option -output_base_name nanoapple2_tm60k
