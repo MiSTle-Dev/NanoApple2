@@ -1127,8 +1127,8 @@ port map(
       g_in      => g(7 downto 4),
       b_in      => b(7 downto 4),
 
-      audio_l => ("00" & (psg_audio_l + audio_sp) & 4x"00"),
-      audio_r => ("00" & (psg_audio_r + audio_sp) & 4x"00"),
+      audio_l => ("0" & (psg_audio_l + audio_sp) & psg_audio_l(9 downto 5)),
+      audio_r => ("0" & (psg_audio_r + audio_sp) & psg_audio_r(9 downto 5)),
       osd_status => open,
 
       mcu_start => mcu_start,
