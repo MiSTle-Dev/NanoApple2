@@ -1,6 +1,5 @@
 set_device GW5AST-LV138FPG676AC1/I0 -device_version B
 
-add_file mockingboard/YM2149.sv
 add_file mouse/jt6805/jt6805.v
 add_file mouse/jt6805/jt6805_alu.v
 add_file mouse/jt6805/jt6805_ctrl.v

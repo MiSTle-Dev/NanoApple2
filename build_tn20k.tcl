@@ -1,6 +1,5 @@
 set_device GW2AR-LV18QN88C8/I7 -name GW2AR-18C
 
-add_file mockingboard/YM2149.sv
 add_file mouse/jt6805/jt6805.v
 add_file mouse/jt6805/jt6805_alu.v
 add_file mouse/jt6805/jt6805_ctrl.v

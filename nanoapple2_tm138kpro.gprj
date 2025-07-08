@@ -5,7 +5,6 @@
     <Version>5</Version>
     <Device name="GW5AST-138B" pn="GW5AST-LV138FPG676AC1/I0">gw5ast138b-007</Device>
     <FileList>
-        <File path="mockingboard/YM2149.sv" type="file.verilog" enable="1"/>
         <File path="mockingboard/jt49/filter/jt49_dcrm.v" type="file.verilog" enable="1"/>
         <File path="mockingboard/jt49/filter/jt49_dcrm2.v" type="file.verilog" enable="1"/>
         <File path="mockingboard/jt49/filter/jt49_dly.v" type="file.verilog" enable="1"/>
