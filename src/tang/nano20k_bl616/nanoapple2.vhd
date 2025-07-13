@@ -39,14 +39,14 @@ entity nanoapple2 is
     -- external hw pin UART
     uart_ext_rx : in std_logic;
     uart_ext_tx : out std_logic;
-    -- SPI interface Sipeed M0S Dock external BL616 uC / PiPico / ESP32
-    m0s         : inout std_logic_vector(4 downto 0);
-    -- SPI connection to onboard BL616 µC
---    spi_sclk    : in std_logic;
---    spi_csn     : in std_logic;
---    spi_dir     : out std_logic;
---    spi_dat     : in std_logic;
---    spi_irqn    : out std_logic;
+    -- SPI interface Sipeed M0S Dock external BL616 uC
+--m0s         : inout std_logic_vector(4 downto 0);
+    -- SPI connection to onboard BL616
+    spi_sclk    : in std_logic;
+    spi_csn     : in std_logic;
+    spi_dir     : out std_logic;
+    spi_dat     : in std_logic;
+    spi_irqn    : out std_logic;
     -- internal lcd
     tmds_clk_n  : out std_logic;
     tmds_clk_p  : out std_logic;
@@ -1182,18 +1182,18 @@ port map(
       );
 
 -- onboard BL616
---spi_io_din  <= spi_dat;
---spi_io_ss   <= spi_csn;
---spi_io_clk  <= spi_sclk;
---spi_dir     <= spi_io_dout;
---spi_irqn    <= int_out_n;
+spi_io_din  <= spi_dat;
+spi_io_ss   <= spi_csn;
+spi_io_clk  <= spi_sclk;
+spi_dir     <= spi_io_dout;
+spi_irqn    <= int_out_n;
 
 -- external M0S Dock BL616 / PiPico  / ESP32
-spi_io_din  <= m0s(1);
-spi_io_ss   <= m0s(2);
-spi_io_clk  <= m0s(3);
-m0s(0)      <= spi_io_dout;
-m0s(4)      <= int_out_n;
+--spi_io_din  <= m0s(1);
+--spi_io_ss   <= m0s(2);
+--spi_io_clk  <= m0s(3);
+--m0s(0)      <= spi_io_dout;
+--m0s(4)      <= int_out_n;
 
 mcu_spi_inst: entity work.mcu_spi 
 port map (
