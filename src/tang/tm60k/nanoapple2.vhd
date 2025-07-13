@@ -60,7 +60,6 @@ entity nanoapple2 is
     tmds_clk_p  : out std_logic;
     tmds_d_n    : out std_logic_vector( 2 downto 0);
     tmds_d_p    : out std_logic_vector( 2 downto 0);
-    hpd_en      : in std_logic;
     pwr_sav     : out std_logic;
     -- sd interface
     sd_clk      : out std_logic;

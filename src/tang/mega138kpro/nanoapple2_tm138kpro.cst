@@ -30,8 +30,6 @@ IO_LOC "tmds_d_p[1]" V24,W24;
 IO_PORT "tmds_d_p[1]" PULL_MODE=NONE IO_TYPE=LVCMOS33D;
 IO_LOC "tmds_d_p[2]" AA22,AA23;
 IO_PORT "tmds_d_p[2]" PULL_MODE=NONE IO_TYPE=LVCMOS33D;
-IO_LOC  "hpd_en"  T15; // HDMI Hot Plug Detection
-IO_PORT "hpd_en"  PULL_MODE=NONE BANK_VCCIO=3.3;
 
 // PMODs (seen from front)
 // Left  C21/R21 B20/A20 B19/A19 A17/A18 GND/GND 3V3/3V3

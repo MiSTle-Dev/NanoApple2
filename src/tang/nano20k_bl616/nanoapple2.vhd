@@ -40,7 +40,7 @@ entity nanoapple2 is
     uart_ext_rx : in std_logic;
     uart_ext_tx : out std_logic;
     -- SPI interface Sipeed M0S Dock external BL616 uC
-    --m0s         : inout std_logic_vector(4 downto 0);
+--m0s         : inout std_logic_vector(4 downto 0);
     -- SPI connection to onboard BL616
     spi_sclk    : in std_logic;
     spi_csn     : in std_logic;
@@ -52,7 +52,6 @@ entity nanoapple2 is
     tmds_clk_p  : out std_logic;
     tmds_d_n    : out std_logic_vector( 2 downto 0);
     tmds_d_p    : out std_logic_vector( 2 downto 0);
-    hpd_en      : in std_logic;
     -- sd interface
     sd_clk      : out std_logic;
     sd_cmd      : inout std_logic;
@@ -356,6 +355,7 @@ signal disk_mount_d       : std_logic_vector(1 downto 0);
 signal disk_chg_trg_d     : std_logic;
 signal nullmdm1, nullmdm2 : std_logic;
 signal leds               : std_logic_vector(5 downto 0);
+signal int_out_n          : std_logic;
 
 component DCS
 generic (
@@ -1186,12 +1186,14 @@ spi_io_din  <= spi_dat;
 spi_io_ss   <= spi_csn;
 spi_io_clk  <= spi_sclk;
 spi_dir     <= spi_io_dout;
+spi_irqn    <= int_out_n;
 
--- M0S Dock
+-- external M0S Dock BL616 / PiPico  / ESP32
 --spi_io_din  <= m0s(1);
 --spi_io_ss   <= m0s(2);
 --spi_io_clk  <= m0s(3);
 --m0s(0)      <= spi_io_dout;
+--m0s(4)      <= int_out_n;
 
 mcu_spi_inst: entity work.mcu_spi 
 port map (
@@ -1296,8 +1298,7 @@ module_inst: entity work.sysctrl
   port_in_strobe      => serial_rx_strobe,
   port_in_data        => serial_rx_data,
 
-  int_out_n           => spi_irqn, -- internal BL616
---int_out_n           => m0s(4), -- M0S Dock
+  int_out_n           => int_out_n,
   int_in              => unsigned'(x"0" & sdc_int & '0' & hid_int & '0'),
   int_ack             => int_ack,
 

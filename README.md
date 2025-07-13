@@ -13,7 +13,7 @@ This project relies on a µC being connected to the FPGA on the Tang Nano 20K. Y
 Basically the µC acts as USB host for USB devices and as an OSD controller using a [SPI communication protocol](https://github.com/harbaum/FPGA-Companion/blob/main/SPI.md).
 
 Onboard BL616 µC  
-* If you don't need the WIFI modem then even the onboard BL616 µC (normally used for bitstream programming) can be used. A dedicated FPGA bitstream and FPGA companion firmware is needed in that configuration.
+* If you don't need the WIFI modem on a TN20K then even the onboard BL616 µC (normally used for bitstream programming) can be used. A dedicated FPGA bitstream and FPGA companion firmware is needed in that configuration. The onboard BL616 µC is presently supported for TN20K and Console 60K boards. WIFI modem is supported on Console 60K too.
 
 For the [M0S Dock (BL616 µC)](https://wiki.sipeed.com/hardware/en/maixzero/m0s/m0s.html) there is a:
 
@@ -61,7 +61,7 @@ Features:
 * SSC configuartion
 * Tape loading via the UART RX pin (ADT Pro)
 * Selectable mixed mode text color artifacts
-* FPGA Companion WIFI modem via SSC (M0S Dock or PiPico W)
+* FPGA Companion WIFI modem via SSC (M0S Dock, PiPico W, Console 60K onboard BL616)
 
 <img src="./.assets/apple2.png" alt="image" width="80%" height="auto">
 

@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------
---  Nano Apple IIe for Tang Nano 20k
+--  Nano Apple IIe for Tang Console 60k / GW5AT-60B
 --  2025 Stefan Voss
 --  based on the work of many others
 -------------------------------------------------------------------------
@@ -32,43 +32,55 @@ entity nanoapple2 is
     clk_in      : in std_logic;
     s2_reset    : in std_logic; -- S2 button
     user        : in std_logic; -- S1 button
-    leds_n      : out std_logic_vector(5 downto 0);
+    leds_n      : out std_logic_vector(2 downto 0);
     -- onboard USB-C Tang BL616 UART
     uart_rx     : in std_logic;
     uart_tx     : out std_logic;
     -- external hw pin UART
     uart_ext_rx : in std_logic;
     uart_ext_tx : out std_logic;
-    -- SPI interface Sipeed M0S Dock external BL616 uC / PiPico / ESP32
-    m0s         : inout std_logic_vector(4 downto 0);
-    -- SPI connection to onboard BL616 µC
---    spi_sclk    : in std_logic;
---    spi_csn     : in std_logic;
---    spi_dir     : out std_logic;
---    spi_dat     : in std_logic;
---    spi_irqn    : out std_logic;
+    -- SPI interface Sipeed M0S Dock external BL616 uC
+--  m0s         : inout std_logic_vector(4 downto 0);
+    -- SPI connection to onboard BL616
+    spi_sclk    : in std_logic;
+    spi_csn     : in std_logic;
+    spi_dir     : out std_logic;
+    spi_dat     : in std_logic;
+    spi_irqn    : out std_logic;
     -- internal lcd
+    lcd_clk     : out std_logic; -- lcd clk
+    lcd_hs      : out std_logic; -- lcd horizontal synchronization
+    lcd_vs      : out std_logic; -- lcd vertical synchronization        
+    lcd_de      : out std_logic; -- lcd data enable     
+    lcd_bl      : out std_logic; -- lcd backlight control
+    lcd_r       : out std_logic_vector(7 downto 0);  -- lcd red
+    lcd_g       : out std_logic_vector(7 downto 0);  -- lcd green
+    lcd_b       : out std_logic_vector(7 downto 0);  -- lcd blue
+    -- audio
+    hp_bck      : out std_logic;
+    hp_ws       : out std_logic;
+    hp_din      : out std_logic;
+    pa_en       : out std_logic;
+    --
     tmds_clk_n  : out std_logic;
     tmds_clk_p  : out std_logic;
     tmds_d_n    : out std_logic_vector( 2 downto 0);
     tmds_d_p    : out std_logic_vector( 2 downto 0);
+    pwr_sav     : out std_logic;
     -- sd interface
     sd_clk      : out std_logic;
     sd_cmd      : inout std_logic;
     sd_dat      : inout std_logic_vector(3 downto 0);
-
-    ws2812       : out std_logic;
-    -- "Magic" port names that the gowin compiler connects to the on-chip SDRAM
-    O_sdram_clk  : out std_logic;
-    O_sdram_cke  : out std_logic;
-    O_sdram_cs_n : out std_logic;
-    O_sdram_cas_n: out std_logic;
-    O_sdram_ras_n: out std_logic;
-    O_sdram_wen_n: out std_logic;
-    IO_sdram_dq  : inout std_logic_vector(31 downto 0);
-    O_sdram_addr : out std_logic_vector(10 downto 0);
-    O_sdram_ba   : out std_logic_vector(1 downto 0);
-    O_sdram_dqm  : out std_logic_vector(3 downto 0);
+    -- MiSTer SDRAM module
+    O_sdram_clk     : out std_logic;
+    O_sdram_cs_n    : out std_logic; -- chip select
+    O_sdram_cas_n   : out std_logic;
+    O_sdram_ras_n   : out std_logic; -- row address select
+    O_sdram_wen_n   : out std_logic; -- write enable
+    IO_sdram_dq     : inout std_logic_vector(15 downto 0); -- 16 bit bidirectional data bus
+    O_sdram_addr    : out std_logic_vector(12 downto 0); -- 13 bit multiplexed address bus
+    O_sdram_ba      : out std_logic_vector(1 downto 0); -- two banks
+    O_sdram_dqm     : out std_logic_vector(1 downto 0); -- 16/2
     -- Gamepad Dualshock P0
     ds_clk          : out std_logic;
     ds_mosi         : out std_logic;
@@ -425,35 +437,14 @@ begin
     end if;
   end process;
   
-pll_inst: entity work.Gowin_rPLL_tn20k
-    port map (
-        clkout => clk_pixel_x5,
-        lock   => pll_locked,
-        clkin  => clk_in
-    );
-
-div1_28mhz: CLKDIV
-generic map(
-    DIV_MODE => "5",
-    GSREN    => "false"
-)
-port map(
-    CLKOUT => clk_sys,
-    HCLKIN => clk_pixel_x5,
-    RESETN => pll_locked,
-    CALIB  => '0'
-);
-
-div2_14mhz: CLKDIV
-generic map(
-  DIV_MODE => "2",
-  GSREN    => "false"
-)
-port map(
-    CLKOUT => clk_core,
-    HCLKIN => clk_sys,
-    RESETN => pll_locked,
-    CALIB  => '0'
+pll_inst: entity work.Gowin_PLL_60k_ntsc
+port map (
+    lock    => pll_locked,
+    clkout0 => clk_pixel_x5,  -- 143M
+    clkout1 => open, -- 71M
+    clkout2 => clk_sys,  -- 28M
+    clkout3 => clk_core,  -- 14M
+    clkin   => clk_in -- 50Mhz
 );
 
 led_ws2812: entity work.ws2812
@@ -461,7 +452,7 @@ led_ws2812: entity work.ws2812
   (
    clk    => clk_sys,
    color  => ws2812_color,
-   data   => ws2812
+   data   => open  --ws2812
   );
 
 gamepad_p1: entity work.dualshock2
@@ -615,28 +606,25 @@ joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
   TEXT_COLOR <= '1' when system_monitor = "00" and system_lores_text = '1'else '0';
   COLOR_LINE_CONTROL <= (COLOR_LINE or (TEXT_COLOR and not TEXT_MODE)) and not (system_monitor(1) or system_monitor(0));  -- Color or B&W mode
 
-dram_inst: entity work.sdram port map(
-    SDRAM_CLK  => O_sdram_clk,
-    SDRAM_CKE  => O_sdram_cke,
-    SDRAM_DQ   => IO_sdram_dq,   -- 32 bit bidirectional data bus
-    SDRAM_A    => O_sdram_addr,  -- 11 bit multiplexed address bus
-    SD_DQM     => O_sdram_dqm,   -- two byte masks
-    SDRAM_BA   => O_sdram_ba,    -- two banks
-    SDRAM_nCS  => O_sdram_cs_n,  -- a single chip select
-    SDRAM_nWE  => O_sdram_wen_n, -- write enable
-    SDRAM_nRAS => O_sdram_ras_n, -- row address select
-    SDRAM_nCAS => O_sdram_cas_n, -- columns address select
-    -- cpu/chipset interface
-    init       => not pll_locked,-- init signal after FPGA config to initialize RAM
-    clk        => clk_sys,
-    clkref     => CLK_2M,
-    din        => ram_di,          -- 8bit data input from chipset/cpu
-    dout       => DO,              -- Data from RAM (lo byte: MAIN RAM, hi byte: AUX RAM)
-    addr       => ram_addr(21 downto 0),
-    oe         => not ram_we,      -- cpu/chipset requests read/wrie
-    we         => ram_we,          -- cpu/chipset requests write
-    aux        => aux              -- Write to MAIN or AUX RAM
-  );
+  O_sdram_clk <= not clk_sys;
+
+  sdram_inst : entity work.sdram port map( sd_data => IO_sdram_dq,
+    sd_addr => O_sdram_addr,
+    sd_dqm => O_sdram_dqm,
+    sd_cs => O_sdram_cs_n,
+    sd_ba => O_sdram_ba,
+    sd_we => O_sdram_wen_n,
+    sd_ras => O_sdram_ras_n,
+    sd_cas => O_sdram_cas_n,
+    clk => clk_sys,
+    clkref => CLK_2M,
+    init_n => pll_locked,
+    din => ram_di,
+    addr => ram_addr,
+    we => ram_we,
+    dout => DO,
+    aux => aux
+    );
 
   -- Simulate power up on cold reset to go to the disk boot routine
   ram_we   <= we_ram when reset_cold = '0' else '1';
@@ -880,13 +868,10 @@ sdcard_interface2: entity work.floppy_track port map (
     TRACK2_BUSY    => TRACK2_RAM_BUSY
     );
 
-  leds_n <= not leds;
-  leds(0) <= D1_ACTIVE;
-  leds(1) <= D2_ACTIVE;
-  leds(2) <= DISK_MOUNT(0);
-  leds(3) <= DISK_MOUNT(1);
-  leds(4) <= hdd_mounted;
-  leds(5) <= '0';
+  leds_n(2 downto 0) <= not leds(2 downto 0);
+  leds(0) <= '0';
+  leds(1) <= '0';
+  leds(2) <= D1_ACTIVE or D2_ACTIVE;
 
   mb : entity  work.mockingboard port map (
       CLK_14M      => clk_core,
@@ -1166,34 +1151,36 @@ port map(
       tmds_d_n   => tmds_d_n,
       tmds_d_p   => tmds_d_p,
 
-      lcd_clk  => open,
-      lcd_hs_n => open,
-      lcd_vs_n => open,
-      lcd_de   => open,
-      lcd_r    => open,
-      lcd_g    => open,
-      lcd_b    => open,
-      lcd_bl   => open,
+      lcd_clk  => lcd_clk,
+      lcd_hs_n => lcd_hs,
+      lcd_vs_n => lcd_vs,
+      lcd_de   => lcd_de,
+      lcd_r    => lcd_r,
+      lcd_g    => lcd_g,
+      lcd_b    => lcd_b,
+      lcd_bl   => lcd_bl,
 
-      hp_bck   => open,
-      hp_ws    => open,
-      hp_din   => open,
-      pa_en    => open
+      hp_bck   => hp_bck,
+      hp_ws    => hp_ws,
+      hp_din   => hp_din,
+      pa_en    => pa_en
       );
 
+pwr_sav <= '1';
+
 -- onboard BL616
---spi_io_din  <= spi_dat;
---spi_io_ss   <= spi_csn;
---spi_io_clk  <= spi_sclk;
---spi_dir     <= spi_io_dout;
---spi_irqn    <= int_out_n;
+spi_io_din  <= spi_dat;
+spi_io_ss   <= spi_csn;
+spi_io_clk  <= spi_sclk;
+spi_dir     <= spi_io_dout;
+spi_irqn    <= int_out_n;
 
 -- external M0S Dock BL616 / PiPico  / ESP32
-spi_io_din  <= m0s(1);
-spi_io_ss   <= m0s(2);
-spi_io_clk  <= m0s(3);
-m0s(0)      <= spi_io_dout;
-m0s(4)      <= int_out_n;
+--spi_io_din  <= m0s(1);
+--spi_io_ss   <= m0s(2);
+--spi_io_clk  <= m0s(3);
+--m0s(0)      <= spi_io_dout;
+--m0s(4)      <= int_out_n;
 
 mcu_spi_inst: entity work.mcu_spi 
 port map (
@@ -1302,7 +1289,7 @@ module_inst: entity work.sysctrl
   int_in              => unsigned'(x"0" & sdc_int & '0' & hid_int & '0'),
   int_ack             => int_ack,
 
-  buttons             => unsigned'(s2_reset & user), -- S0 and S1 buttons on Tang Nano 20k
+  buttons             => unsigned'(not s2_reset & not user), -- S0 and S1 buttons on Tang Nano 20k
   leds                => open,-- two leds can be controlled from the MCU
   color               => ws2812_color -- a 24bit color to e.g. be used to drive the ws2812
 );
