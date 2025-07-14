@@ -35,7 +35,7 @@ entity nanoapple2 is
     leds_n      : out std_logic_vector(5 downto 0);
     -- onboard USB-C Tang BL616 UART
     uart_rx     : in std_logic;
-    uart_tx     : out std_logic;
+--uart_tx     : out std_logic;
     -- external hw pin UART
     uart_ext_rx : in std_logic;
     uart_ext_tx : out std_logic;
@@ -85,6 +85,7 @@ end nanoapple2;
 
 architecture datapath of nanoapple2 is
 
+signal uart_tx : std_logic;
 signal clk_sys : std_logic;
 signal clk_core : std_logic;
 signal clk_pixel_x5 : std_logic;
