@@ -28,8 +28,8 @@ IO_LOC  "leds_n[0]"   G11; // fpga done
 IO_PORT "leds_n[0]"   IO_TYPE=LVCMOS33 DRIVE=4 PULL_MODE=NONE BANK_VCCIO=3.3;
 IO_LOC  "leds_n[1]"   U12; // fpga ready
 IO_PORT "leds_n[1]"   IO_TYPE=LVCMOS33 DRIVE=4 PULL_MODE=NONE BANK_VCCIO=3.3;
-IO_LOC  "leds_n[2]"   V13; // sys_act
-IO_PORT "leds_n[2]"   IO_TYPE=LVCMOS33 DRIVE=4 PULL_MODE=NONE BANK_VCCIO=3.3;
+//IO_LOC  "leds_n[2]"   V13; // sys_act
+//IO_PORT "leds_n[2]"   IO_TYPE=LVCMOS33 DRIVE=4 PULL_MODE=NONE BANK_VCCIO=3.3;
 
 // UART through USB-C port
 IO_LOC "uart_rx" M16; // DUMMY !!! need to be V14, not functional as no pin left in between onboard bl616 and FPGA... 
