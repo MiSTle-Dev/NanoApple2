@@ -32,7 +32,7 @@ entity nanoapple2 is
     clk_in      : in std_logic;
     s2_reset    : in std_logic; -- S2 button
     user        : in std_logic; -- S1 button
-    leds_n      : out std_logic_vector(2 downto 0);
+    leds_n      : out std_logic_vector(1 downto 0);
     -- onboard USB-C Tang BL616 UART
     uart_rx     : in std_logic;
     uart_tx     : out std_logic;
@@ -868,10 +868,9 @@ sdcard_interface2: entity work.floppy_track port map (
     TRACK2_BUSY    => TRACK2_RAM_BUSY
     );
 
-  leds_n(2 downto 0) <= not leds(2 downto 0);
-  leds(0) <= '0';
+  leds_n(1 downto 0) <= not leds(1 downto 0);
+  leds(0) <= D1_ACTIVE or D2_ACTIVE;
   leds(1) <= '0';
-  leds(2) <= D1_ACTIVE or D2_ACTIVE;
 
   mb : entity  work.mockingboard port map (
       CLK_14M      => clk_core,
