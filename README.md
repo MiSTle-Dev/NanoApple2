@@ -6,6 +6,7 @@ The Nano Apple IIe is a port of both [MiSTer](https://github.com/MiSTer-devel/Ap
 | ---        |        -   | -     |-|
 | [Tang Nano 20k](https://wiki.sipeed.com/nano20k)     | [GW2AR](https://www.gowinsemi.com/en/product/detail/38/)  |HDMI | |
 | [Tang Console 60K NEO](https://wiki.sipeed.com/hardware/en/tang/tang-console/mega-console.html)|[GW5AT-60](https://www.gowinsemi.com/en/product/detail/60/) | HDMI / LCD ||
+| [Tang Console 138K NEO](https://wiki.sipeed.com/hardware/en/tang/tang-console/mega-console.html)|[GW5AST-138](https://www.gowinsemi.com/en/product/detail/60/)|HDMI / LCD ||
 | [Tang Mega 60k NEO](https://wiki.sipeed.com/hardware/en/tang/tang-mega-60k/mega-60k.html)|[GW5AT-60](https://www.gowinsemi.com/en/product/detail/60/)| HDMI / LCD| |
 | [Tang Mega 138k Pro](https://wiki.sipeed.com/hardware/en/tang/tang-mega-138k/mega-138k-pro.html)|[GW5AST-138](https://www.gowinsemi.com/en/product/detail/60/) |HDMI / LCD| |
 
@@ -13,7 +14,7 @@ This project relies on a µC being connected to the FPGA on the Tang Nano 20K. Y
 Basically the µC acts as USB host for USB devices and as an OSD controller using a [SPI communication protocol](https://github.com/harbaum/FPGA-Companion/blob/main/SPI.md).
 
 Onboard BL616 µC  
-* If you don't need the WIFI modem on a TN20K then even the onboard BL616 µC (normally used for bitstream programming) can be used. A dedicated FPGA bitstream and FPGA companion firmware is needed in that configuration. The onboard BL616 µC is presently supported for TN20K and Console 60K boards. WIFI modem is supported on Console 60K too.
+* If you don't need the WIFI modem on a TN20K then even the onboard BL616 µC (normally used for bitstream programming) can be used. A dedicated FPGA bitstream and FPGA companion firmware is needed in that configuration. The onboard BL616 µC is presently supported for TN20K and Console 60K/138k boards. WIFI modem is supported on Console 60K/138k too.
 
 For the [M0S Dock (BL616 µC)](https://wiki.sipeed.com/hardware/en/maixzero/m0s/m0s.html) there is a:
 
@@ -29,7 +30,7 @@ and for the Raspberry PiPico (RP2040 µC) there is a:
 * [Custom PMOD RP2040-Zero](https://github.com/vossstef/tang_nano_20k_c64/tree/main/board/pizero_pmod/README.md) for Primer / Mega / Console Boards
 * case (upcoming)  
 
-The project based on an Apple ][+ FPGA implementation.  
+The project based on an Apple ``][+`` FPGA implementation.  
 Original for the DE2: https://www.cs.columbia.edu/~sedwards/apple2fpga/  
 Port for the MiST: http://ws0.org/tag/apple2/  
 
@@ -61,7 +62,7 @@ Features:
 * SSC configuartion
 * Tape loading via the UART RX pin (ADT Pro)
 * Selectable mixed mode text color artifacts
-* FPGA Companion WIFI modem via SSC (M0S Dock, PiPico W, Console 60K onboard BL616)
+* FPGA Companion WIFI modem via SSC (M0S Dock, PiPico W, Console 60K/138k onboard BL616)
 
 <img src="./.assets/apple2.png" alt="image" width="80%" height="auto">
 
@@ -69,9 +70,9 @@ Features:
 > Be aware that this core loads **.NIB** Disk Drive images only identical to the MIST core.  
 > On the fly conversion from .DSK as the MISTer core is doing using Linux host system is not supported. 
 
-## Tang Console 60k NEO
+## Tang Console 60k / 138K NEO
 
-See [Tang Console 60K NEO](TANG_CONSOLE_60K.md)
+See [Tang Console 60K / 138K NEO](TANG_CONSOLE_60K.md)
 
 ## Tang Mega 60k NEO
 
@@ -193,7 +194,7 @@ USB Mouse as Joystick.
 
 ## LED UI
 
-| LED | function         |TN9K  |TN20K |TP20K  |TP25K  |TM60K   |TM138k|Console60k|
+| LED | function         |TN9K  |TN20K |TP20K  |TP25K  |TM60K   |TM138k|Console60k/138k|
 | --- |        -         |-     |-     |-      | -     | -      | -    |-         |
 | 0   | FDD1 activity    |-     |x     |-      | -     | x      | x    |x         |
 | 1   | FDD2 activity    |-     |x     |-      | -     | x      | x    |x         |

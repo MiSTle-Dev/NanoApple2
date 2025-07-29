@@ -8,8 +8,8 @@ This has been tested on Windows 11. It should work on older versions too.
 
 Software needed:
 
-  - [Gowin V1.9.10.03](https://www.gowinsemi.com/en/support/home/) **to synthesize the core**
-  - [Gowin V1.9.10.03](https://www.gowinsemi.com/en/support/home/) **to program the flash of the TANG FPGA**
+  - [Gowin V1.9.11.03](https://www.gowinsemi.com/en/support/home/) **to synthesize the core**
+  - [Gowin V1.9.11.03](https://www.gowinsemi.com/en/support/home/) **to program the flash of the TANG FPGA**
   - [BouffaloLabDevCube](https://dev.bouffalolab.com/download) **to flash the BL616**
   - [Latest release](https://github.com/vossstef/NanoApple2/releases/latest) of A2600Nano **FPGA** bitstream
   - [Latest release](http://github.com/harbaum/FPGA-Companion/releases/latest) of FPGA companion firmware **µC firmware** (if not otherwise stated in the release note.)
@@ -33,12 +33,12 @@ on your desktop or in your start menu.
  - Release the ```S2``` button
  - Start Gowin. **You should see the following screen**
 
-![](https://github.com/vossstef/NanoApple2/blob/main/.assets/gowin1.jpg)
+![](.assets/gowin1.jpg)
 
 Now press on the “programmer” marked red on the picture above. **You
 should see following screen:**
 
-![](https://github.com/vossstef/NanoApple2/blob/main/.assets/device.png)
+![](.assets/device.png)
 
 -   Press save on the dialog
 -   From there you can add a device for programming by pressing on the little
@@ -76,6 +76,8 @@ Windows shell and Gowin Programmer<br>
 ```programmer_cli  -r 36 --fsFile NanoApple2_tp25k.fs --spiaddr 0x000000 --cable-index 1 --d GW5A-25A```<br>
 ```programmer_cli  -r 36 --fsFile nanoapple2_tm60k.fs --spiaddr 0x000000 --cable-index 1 --d GW5AT-60B```<br>
 ```programmer_cli  -r 36 --fsFile NanoApple2_tm138k_pro.fs --spiaddr 0x000000 --cable-index 1 --d GW5AST-138B```<br>
+```programmer_cli  -r 36 --fsFile NanoApple2_tc60k.fs --spiaddr 0x000000 --cable-index 1 --d GW5AT-60B```<br>
+```programmer_cli  -r 36 --fsFile NanoApple2_tc138k.fs --spiaddr 0x000000 --cable-index 1 --d GW5AST-138B```<br>
 
 **That´s it for the Tang Nano 20k**
 
@@ -83,22 +85,12 @@ Windows shell and Gowin Programmer<br>
 
 For the BL616 you have to extract and start the BuffaloLabDevCube. 
 
-**If you use the internal BL616 present on the Tang Nano 20K you loose
-your possibility to flash the Tang over the USB connection.** It is thus
-strongly recommended to use an external BL616 (e.g. a M0S Dock).
-
-However, when using the internal BL616 you will be able to flash the
-[original firmware](https://github.com/harbaum/MiSTeryNano/blob/main/bl616/friend_20k)
-to the internal BL616 again to restore the flasher functionality of
-the Tang Nano 20K. Using an external M0S is nevertheless recommended.
-
 -   Press the ```BOOT``` button on your M0S Dock before you plug the USB connection
     on your PC. You should hear the hardware detecting sound.
 -   Start the BuffaloLabDevCube from the directory where you decompressed it it
     ask you what chip should be used. Select BL616/BL618 and press “finish”
 
-![](https://github.com/vossstef/NanoApple2/blob/main/.assets/buffstart.png)
-
+![buffstart](.assets/buffstart.png)
 - You'll now see the program screen. On the right it should auto detect your
   device with a COM port. If not take a look in the device manager to check for
   the correct device detection.
@@ -107,7 +99,7 @@ the Tang Nano 20K. Using an external M0S is nevertheless recommended.
 - Choose “Open Uart” and than press “Create & Download”. The firmware should now be
   flashed
 
-![](https://github.com/vossstef/NanoApple2/blob/main/.assets/bufffinish.png)
+![bufffinish](.assets/bufffinish.png)
 
 ## Prepare the SD card
 
