@@ -28,6 +28,10 @@ echo ============ build console 60k onboard bl616 ===============
 echo.
 %GWSH% build_tc60k_bl616.tcl
 echo.
+echo ============ build console 138k onboard bl616 ===============
+echo.
+%GWSH% build_tc138k.tcl
+echo.
 
 echo "done."
 dir impl\pnr\*.fs

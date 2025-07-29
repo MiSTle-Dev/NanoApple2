@@ -438,7 +438,7 @@ begin
     end if;
   end process;
   
-pll_inst: entity work.Gowin_PLL_60k_ntsc
+pll_inst: entity work.Gowin_PLL_138k_ntsc
 port map (
     lock    => pll_locked,
     clkout0 => clk_pixel_x5,  -- 143M
