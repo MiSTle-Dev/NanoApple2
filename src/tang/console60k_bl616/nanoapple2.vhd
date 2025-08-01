@@ -34,8 +34,8 @@ entity nanoapple2 is
     user        : in std_logic; -- S1 button
     leds_n      : out std_logic_vector(1 downto 0);
     -- onboard USB-C Tang BL616 UART
-    uart_rx     : in std_logic;
-    uart_tx     : out std_logic;
+    --uart_rx     : in std_logic;
+    --uart_tx     : out std_logic;
     -- external hw pin UART
     uart_ext_rx : in std_logic;
     uart_ext_tx : out std_logic;
@@ -369,6 +369,8 @@ signal disk_chg_trg_d     : std_logic;
 signal nullmdm1, nullmdm2 : std_logic;
 signal leds               : std_logic_vector(5 downto 0);
 signal int_out_n          : std_logic;
+signal uart_rx            : std_logic :='0';
+signal uart_tx            : std_logic;
 
 component DCS
 generic (
