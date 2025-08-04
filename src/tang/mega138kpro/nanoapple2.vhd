@@ -41,6 +41,12 @@ entity nanoapple2 is
     uart_ext_tx : out std_logic;
     -- SPI interface Sipeed M0S Dock external BL616 uC
     m0s         : inout std_logic_vector(4 downto 0);
+    -- SPI connection to onboard BL616
+    spi_sclk    : in std_logic;
+    spi_csn     : in std_logic;
+    spi_dir     : out std_logic;
+    spi_dat     : in std_logic;
+    spi_irqn    : out std_logic;
     -- internal lcd
     lcd_clk     : out std_logic; -- lcd clk
     lcd_hs      : out std_logic; -- lcd horizontal synchronization
@@ -270,6 +276,7 @@ signal spi_io_din     : std_logic;
 signal spi_io_ss      : std_logic;
 signal spi_io_clk     : std_logic;
 signal spi_io_dout    : std_logic;
+signal spi_ext        : std_logic;
 signal mcu_start      : std_logic;
 signal mcu_sys_strobe : std_logic;
 signal mcu_hid_strobe : std_logic;
@@ -362,6 +369,7 @@ signal disk_mount_d       : std_logic_vector(1 downto 0);
 signal disk_chg_trg_d     : std_logic;
 signal nullmdm1, nullmdm2 : std_logic;
 signal leds               : std_logic_vector(5 downto 0);
+signal int_out_n          : std_logic;
 
 component DCS
 generic (
@@ -1163,10 +1171,33 @@ port map(
       pa_en    => pa_en
       );
 
-spi_io_din  <= m0s(1);
-spi_io_ss   <= m0s(2);
-spi_io_clk  <= m0s(3);
-m0s(0)      <= spi_io_dout; -- M0 Dock
+-- ----------------- SPI input parser ----------------------
+
+-- by default the internal SPI is being used. Once there is
+-- a select from the external spi (M0S Dock) , then the connection is being switched
+process (clk_sys, pll_locked)
+begin
+  if pll_locked = '0' then
+    spi_ext <= '0';
+  elsif rising_edge(clk_sys) then
+    spi_ext <= spi_ext;
+    if m0s(2) = '0' then
+        spi_ext <= '1';
+    end if;
+  end if;
+end process;
+
+  -- map output data onto both spi outputs
+  spi_io_din  <= m0s(1) when spi_ext = '1' else spi_dat;
+  spi_io_ss   <= m0s(2) when spi_ext = '1' else spi_csn;
+  spi_io_clk  <= m0s(3) when spi_ext = '1' else spi_sclk;
+
+  -- onboard BL616
+  spi_dir     <= spi_io_dout;
+  spi_irqn    <= int_out_n;
+  -- external M0S Dock BL616 / PiPico  / ESP32
+  m0s(0)      <= spi_io_dout;
+  m0s(4)      <= int_out_n;
 
 mcu_spi_inst: entity work.mcu_spi 
 port map (
@@ -1271,7 +1302,7 @@ module_inst: entity work.sysctrl
   port_in_strobe      => serial_rx_strobe,
   port_in_data        => serial_rx_data,
 
-  int_out_n           => m0s(4),
+  int_out_n           => int_out_n,
   int_in              => unsigned'(x"0" & sdc_int & '0' & hid_int & '0'),
   int_ack             => int_ack,
 
