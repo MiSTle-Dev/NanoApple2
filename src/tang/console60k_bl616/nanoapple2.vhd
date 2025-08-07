@@ -447,7 +447,8 @@ port map (
     clkout1 => open, -- 71M
     clkout2 => clk_sys,  -- 28M
     clkout3 => clk_core,  -- 14M
-    clkin   => clk_in -- 50Mhz
+    clkin   => clk_in, -- 50Mhz
+    mdclk   => clk_in
 );
 
 led_ws2812: entity work.ws2812
@@ -665,7 +666,7 @@ joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
     NMI_N          => '1',
     ram_we         => we_ram,
     VIDEO          => VIDEO,
-    PALMODE        => not system_video_std,
+    PALMODE        => '0', -- not system_video_std,
     ROMSWITCH      => not system_videorom,
     COLOR_LINE     => COLOR_LINE,
     TEXT_MODE      => TEXT_MODE,
@@ -1125,7 +1126,7 @@ port map(
       clk_pixel_x5 => clk_pixel_x5,
       audio_div    => (others => '0'),
       
-      ntscmode  => system_video_std,
+      ntscmode  => '1', -- system_video_std,
       vb_in     => vblank,
       hb_in     => hblank,
       hs_in_n   => hsync,

@@ -442,10 +442,11 @@ begin
 pll_inst: entity work.Gowin_PLL_138kpro_ntsc
 port map (
     lock    => pll_locked,
+    init_clk => clk_in,
     clkout0 => clk_pixel_x5,  -- 143M
     clkout1 => open, -- 71M
     clkout2 => clk_sys,  -- 28M
-    clkout3 => clk_core,  -- 14M
+    clkout3 => clk_core, -- 14M
     clkin   => clk_in -- 50Mhz
 );
 
@@ -664,7 +665,7 @@ joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
     NMI_N          => '1',
     ram_we         => we_ram,
     VIDEO          => VIDEO,
-    PALMODE        => not system_video_std,
+    PALMODE        => '0', -- not system_video_std,
     ROMSWITCH      => not system_videorom,
     COLOR_LINE     => COLOR_LINE,
     TEXT_MODE      => TEXT_MODE,
@@ -1128,7 +1129,7 @@ port map(
       clk_pixel_x5 => clk_pixel_x5,
       audio_div    => (others => '0'),
       
-      ntscmode  => system_video_std,
+      ntscmode  => '1', -- system_video_std,
       vb_in     => vblank,
       hb_in     => hblank,
       hs_in_n   => hsync,
@@ -1179,6 +1180,7 @@ process (clk_sys, pll_locked)
 begin
   if pll_locked = '0' then
     spi_ext <= '0';
+    m0s(3 downto 1 ) <= (others => 'Z');
   elsif rising_edge(clk_sys) then
     spi_ext <= spi_ext;
     if m0s(2) = '0' then
