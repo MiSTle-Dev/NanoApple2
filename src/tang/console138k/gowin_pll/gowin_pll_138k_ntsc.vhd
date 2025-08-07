@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 
 
-entity Gowin_PLL_138kpro_ntsc is
+entity Gowin_PLL_138k_ntsc is
     port (
         clkin: in std_logic;
         init_clk: in std_logic;
@@ -12,17 +12,17 @@ entity Gowin_PLL_138kpro_ntsc is
         clkout3: out std_logic;
         lock: out std_logic
     );
-end Gowin_PLL_138kpro_ntsc;
+end Gowin_PLL_138k_ntsc;
 
 
-architecture Behavioral of Gowin_PLL_138kpro_ntsc is
+architecture Behavioral of Gowin_PLL_138k_ntsc is
     signal icpsel: std_logic_vector(5 downto 0);
     signal lpfres: std_logic_vector(2 downto 0);
     signal pll_lock: std_logic;
     signal pll_rst: std_logic;
 
 
-    component Gowin_PLL_138kpro_ntsc_MOD
+    component Gowin_PLL_138k_ntsc_MOD
         port (
             clkout1: out std_logic;
             clkout2: out std_logic;
@@ -56,7 +56,7 @@ architecture Behavioral of Gowin_PLL_138kpro_ntsc is
 
 
 begin
-    u_pll: Gowin_PLL_138kpro_ntsc_MOD
+    u_pll: Gowin_PLL_138k_ntsc_MOD
         port map (
             clkout1 => clkout1,
             clkout2 => clkout2,
@@ -87,4 +87,4 @@ begin
         );
 
 
-end Behavioral; --Gowin_PLL_138kpro_ntsc
+end Behavioral; --Gowin_PLL_138k_ntsc

@@ -81,10 +81,10 @@ wire [39:0] vtiming0  = {         10'd524,  10'd480, 10'd9,  10'd6 };
 wire [7:0] cea0 = 8'd2; // CEA is HDMI mode in group 1
    
 // PAL
-wire [54:0] htiming1  = { 11'd0,  12'd912, 11'd640, 11'd24, 11'd72 };  
-wire [54:0] whtiming1 = { 11'd60, 12'd912, 11'd964, 11'd16, 11'd32 };  
-wire [39:0] vtiming1  = {         10'd624, 10'd476,  10'd5,  10'd5 };
-wire [7:0]  cea1 = 8'd2; // cea 8'd17;
+wire [54:0] htiming1  = { 11'd0,  12'd912, 11'd640, 11'd24, 11'd72 };
+wire [54:0] whtiming1 = { 11'd0,  12'd912, 11'd640, 11'd5 , 11'd5 };
+wire [39:0] vtiming1  = {         10'd524, 10'd480, 10'd5 , 10'd5 };
+wire [7:0] cea1 = 8'd17; // 
    
 // MONO    640x400@71hz  aspect 1.6    
 wire [55:0] htiming2  = { 11'd0,   12'd896, 11'd640, 11'd24, 11'd72 };
