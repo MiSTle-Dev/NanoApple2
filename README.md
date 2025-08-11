@@ -6,15 +6,15 @@ The Nano Apple IIe is a port of both [MiSTer](https://github.com/MiSTer-devel/Ap
 | ---        |        -   | -     |-|
 | [Tang Nano 20k](https://wiki.sipeed.com/nano20k)     | [GW2AR](https://www.gowinsemi.com/en/product/detail/38/)  |HDMI | |
 | [Tang Console 60K NEO](https://wiki.sipeed.com/hardware/en/tang/tang-console/mega-console.html)|[GW5AT-60](https://www.gowinsemi.com/en/product/detail/60/) | HDMI / LCD ||
-| [Tang Console 138K NEO](https://wiki.sipeed.com/hardware/en/tang/tang-console/mega-console.html)|[GW5AST-138](https://www.gowinsemi.com/en/product/detail/60/)|HDMI / LCD ||
+| [Tang Console 138K NEO](https://wiki.sipeed.com/hardware/en/tang/tang-console/mega-console.html)|[GW5AST-138](https://www.gowinsemi.com/en/product/detail/60/)|HDMI / LCD |PiPico/ M0S Dock only|
 | [Tang Mega 60k NEO](https://wiki.sipeed.com/hardware/en/tang/tang-mega-60k/mega-60k.html)|[GW5AT-60](https://www.gowinsemi.com/en/product/detail/60/)| HDMI / LCD| |
-| [Tang Mega 138k Pro](https://wiki.sipeed.com/hardware/en/tang/tang-mega-138k/mega-138k-pro.html)|[GW5AST-138](https://www.gowinsemi.com/en/product/detail/60/) |HDMI / LCD| |
+| [Tang Mega 138k Pro](https://wiki.sipeed.com/hardware/en/tang/tang-mega-138k/mega-138k-pro.html)|[GW5AST-138](https://www.gowinsemi.com/en/product/detail/60/) |HDMI / LCD|PiPico/ M0S Dock only|
 
 This project relies on a µC being connected to the FPGA on the Tang Nano 20K. You can use the onboard BL616, [M0S Dock BL616](https://wiki.sipeed.com/hardware/en/maixzero/m0s/m0s.html), [Raspberry Pi Pico (W)](https://www.raspberrypi.com/documentation/microcontrollers/pico-series.html) or [esp32-s2](https://www.espressif.com/en/products/socs/esp32-s2)/[s3](https://www.espressif.com/en/products/socs/esp32-s3) and use the [FPGA companion firmware](http://github.com/harbaum/FPGA-Companion).  
 Basically the µC acts as USB host for USB devices and as an OSD controller using a [SPI communication protocol](https://github.com/harbaum/FPGA-Companion/blob/main/SPI.md).
 
 Onboard BL616 µC  
-* If you don't need the WIFI modem on a TN20K then even the onboard BL616 µC (normally used for bitstream programming) can be used. A dedicated FPGA bitstream and FPGA companion firmware is needed in that configuration. The onboard BL616 µC is presently supported for TN20K and Console 60K/138k boards. WIFI modem is supported on Console 60K/138k too.
+* If you don't need the WIFI modem on a TN20K then even the onboard BL616 µC (normally used for bitstream programming) can be used. A dedicated FPGA bitstream and FPGA companion firmware is needed in that configuration. The onboard BL616 µC is presently supported for TN20K and Console 60K board. WIFI modem is supported on Console 60K too.
 
 For the [M0S Dock (BL616 µC)](https://wiki.sipeed.com/hardware/en/maixzero/m0s/m0s.html) there is a:
 
