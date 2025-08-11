@@ -36,6 +36,11 @@ entity nanoapple2 is
     -- onboard USB-C Tang BL616 UART
     uart_rx     : in std_logic;
     uart_tx     : out std_logic;
+
+    twimux       : out std_logic_vector(2 downto 0);
+    bl616_mon_tx : out std_logic;
+    bl616_mon_rx : in std_logic;
+
     -- external hw pin UART
     uart_ext_rx : in std_logic;
     uart_ext_tx : out std_logic;
@@ -400,6 +405,9 @@ component CLKDIV
 end component;
 
 begin
+  twimux <= "100"; -- connect bl616 TWI4 PLL1
+  uart_tx <= bl616_mon_rx;
+  bl616_mon_tx <= uart_rx;
 
   reset_cold <= system_reset(1) or not pll_locked or pause;
 
@@ -1002,7 +1010,7 @@ end process;
     SW2            => ssc_sw2,
 
     UART_RX        => uart_rx_muxed,
-    UART_TX        => uart_tx,
+    UART_TX        => open, -- uart_tx,
     UART_CTS       => nullmdm1,
     UART_RTS       => nullmdm1,
     UART_DCD       => nullmdm2,
