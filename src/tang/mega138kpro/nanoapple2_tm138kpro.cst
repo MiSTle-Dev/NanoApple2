@@ -7,21 +7,32 @@ IO_LOC "spi_dat" H10; // TDI
 IO_PORT "spi_dat" PULL_MODE=UP DRIVE=OFF IO_TYPE=LVCMOS33;
 IO_LOC "spi_dir" J10; // TDO
 IO_PORT "spi_dir" PULL_MODE=NONE DRIVE=8 IO_TYPE=LVCMOS33;
-IO_LOC "spi_irqn" P15; // UART TX
+IO_LOC "spi_irqn" P15; // K26 GPIO_27 PLL1_TWI SDA
 IO_PORT "spi_irqn" PULL_MODE=NONE DRIVE=8 IO_TYPE=LVCMOS33;
+
+// BL616 UART console
+IO_PORT "uart_rx" PULL_MODE=UP DRIVE=OFF IO_TYPE=LVCMOS33;
+IO_PORT "uart_tx" DRIVE=8 IO_TYPE=LVCMOS33;
+IO_LOC "uart_rx" K25; // GPIO_28 PLL1_TWI SCL
+IO_LOC "uart_tx" A20; // P15; // GPIO_11 
+
+IO_PORT "twimux[0]" DRIVE=4 IO_TYPE=LVCMOS33;
+IO_LOC "twimux[0]" N19;
+IO_PORT "twimux[1]" DRIVE=4 IO_TYPE=LVCMOS33;
+IO_LOC "twimux[1]" P19;
+IO_PORT "twimux[2]" DRIVE=4 IO_TYPE=LVCMOS33;
+IO_LOC "twimux[2]" P26;
+
+IO_LOC "bl616_mon_tx" B21;
+IO_PORT "bl616_mon_tx" DRIVE=4 IO_TYPE=LVCMOS33;
+IO_LOC "bl616_mon_rx" C21;
+IO_PORT "bl616_mon_rx" PULL_MODE=UP IO_TYPE=LVCMOS33 BANK_VCCIO=3.3;
 
 // external UART hw pin
 IO_PORT "uart_ext_rx" PULL_MODE=UP IO_TYPE=LVCMOS33; // UART RX
 IO_LOC "uart_ext_rx" H15;
 IO_PORT "uart_ext_tx" PULL_MODE=NONE IO_TYPE=LVCMOS33; // UART TX
 IO_LOC "uart_ext_tx" H14;
-
-// UART through USB-C port
-IO_LOC "uart_rx" N16;
-//IO_LOC "uart_tx" P15;
-IO_LOC "uart_tx" M20; // dummy pin
-IO_PORT "uart_rx" IO_TYPE=LVCMOS33;
-IO_PORT "uart_tx" IO_TYPE=LVCMOS33;
 
 IO_LOC "clk_in" P16;        // 50Mhz
 IO_PORT "clk_in" IO_TYPE=LVCMOS33 PULL_MODE=NONE DRIVE=OFF BANK_VCCIO=3.3;
