@@ -35,12 +35,15 @@ entity nanoapple2 is
     leds_n      : out std_logic_vector(5 downto 0);
     -- onboard USB-C Tang BL616 UART
     uart_rx     : in std_logic;
---uart_tx     : out std_logic;
+    uart_tx     : out std_logic;
+    -- monitor port
+    bl616_mon_tx : out std_logic;
+    bl616_mon_rx : in std_logic;
     -- external hw pin UART
     uart_ext_rx : in std_logic;
     uart_ext_tx : out std_logic;
     -- SPI interface Sipeed M0S Dock external BL616 uC
---m0s         : inout std_logic_vector(4 downto 0);
+    m0s         : inout std_logic_vector(4 downto 0);
     -- SPI connection to onboard BL616
     spi_sclk    : in std_logic;
     spi_csn     : in std_logic;
@@ -85,7 +88,6 @@ end nanoapple2;
 
 architecture datapath of nanoapple2 is
 
-signal uart_tx : std_logic;
 signal clk_sys : std_logic;
 signal clk_core : std_logic;
 signal clk_pixel_x5 : std_logic;
@@ -264,6 +266,7 @@ signal spi_io_din     : std_logic;
 signal spi_io_ss      : std_logic;
 signal spi_io_clk     : std_logic;
 signal spi_io_dout    : std_logic;
+signal spi_ext        : std_logic;
 signal mcu_start      : std_logic;
 signal mcu_sys_strobe : std_logic;
 signal mcu_hid_strobe : std_logic;
@@ -387,6 +390,9 @@ component CLKDIV
 end component;
 
 begin
+  -- BL616 console to hw pins for external USB-UART adapter
+  uart_tx <= bl616_mon_rx;
+  bl616_mon_tx <= uart_rx;
 
   reset_cold <= system_reset(1) or not pll_locked or pause;
 
@@ -1012,7 +1018,7 @@ end process;
     SW2            => ssc_sw2,
 
     UART_RX        => uart_rx_muxed,
-    UART_TX        => uart_tx,
+    UART_TX        => open, -- uart_tx,
     UART_CTS       => nullmdm1,
     UART_RTS       => nullmdm1,
     UART_DCD       => nullmdm2,
@@ -1182,19 +1188,33 @@ port map(
       pa_en    => open
       );
 
--- onboard BL616
-spi_io_din  <= spi_dat;
-spi_io_ss   <= spi_csn;
-spi_io_clk  <= spi_sclk;
-spi_dir     <= spi_io_dout;
-spi_irqn    <= int_out_n;
+-- ----------------- SPI input parser ----------------------
 
--- external M0S Dock BL616 / PiPico  / ESP32
---spi_io_din  <= m0s(1);
---spi_io_ss   <= m0s(2);
---spi_io_clk  <= m0s(3);
---m0s(0)      <= spi_io_dout;
---m0s(4)      <= int_out_n;
+-- by default the internal SPI is being used. Once there is
+-- a select from the external spi (M0S Dock) , then the connection is being switched
+process (clk_sys, pll_locked)
+begin
+  if pll_locked = '0' then
+    spi_ext <= '0';
+  elsif rising_edge(clk_sys) then
+    spi_ext <= spi_ext;
+    if m0s(2) = '0' then
+        spi_ext <= '1';
+    end if;
+  end if;
+end process;
+
+  -- map output data onto both spi outputs
+  spi_io_din  <= m0s(1) when spi_ext = '1' else spi_dat;
+  spi_io_ss   <= m0s(2) when spi_ext = '1' else spi_csn;
+  spi_io_clk  <= m0s(3) when spi_ext = '1' else spi_sclk;
+
+  -- onboard BL616
+  spi_dir     <= spi_io_dout;
+  spi_irqn    <= int_out_n;
+  -- external M0S Dock BL616 / PiPico  / ESP32
+  m0s(0)      <= spi_io_dout;
+  m0s(4)      <= int_out_n;
 
 mcu_spi_inst: entity work.mcu_spi 
 port map (
