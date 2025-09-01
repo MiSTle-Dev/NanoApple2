@@ -9,11 +9,13 @@ The Nano Apple IIe is a port of both [MiSTer](https://github.com/MiSTer-devel/Ap
 | [Tang Console 138K NEO](https://wiki.sipeed.com/hardware/en/tang/tang-console/mega-console.html)|[GW5AST-138](https://www.gowinsemi.com/en/product/detail/60/)|HDMI / LCD |PiPico/ M0S Dock only|
 | [Tang Mega 60k NEO](https://wiki.sipeed.com/hardware/en/tang/tang-mega-60k/mega-60k.html)|[GW5AT-60](https://www.gowinsemi.com/en/product/detail/60/)| HDMI / LCD| |
 | [Tang Mega 138k Pro](https://wiki.sipeed.com/hardware/en/tang/tang-mega-138k/mega-138k-pro.html)|[GW5AST-138](https://www.gowinsemi.com/en/product/detail/60/) |HDMI / LCD|PiPico/ M0S Dock only|
+| [Tang Primer 25K](https://wiki.sipeed.com/hardware/en/tang/tang-primer-25k/primer-25k.html) | [GW5A-25](https://www.gowinsemi.com/en/product/detail/60/)  | HDMI |no Dualshock|
 
-This project relies on a µC being connected to the FPGA on the Tang Nano 20K. --> [MiSTle-Dev wiki](https://github.com/MiSTle-Dev/.github/wiki) <--  
+
+This project relies on a µC being connected to the FPGA. --> [MiSTle-Dev wiki](https://github.com/MiSTle-Dev/.github/wiki) <--  
 
 > [!NOTE]
-> If you don't need the WIFI modem on a TN20K then even the onboard BL616 µC (normally used for bitstream programming) can be used. A dedicated FPGA bitstream and FPGA companion firmware is needed in that configuration. The onboard BL616 µC is presently supported for TN20K and Console 60K board. WIFI modem is supported on Console 60K too (requires antenna)
+> If you don't need the WIFI modem on a Nano20K/Primer25k then even the onboard BL616 µC (normally used for bitstream programming) can be used. A dedicated FPGA bitstream and FPGA companion firmware is needed in that configuration. The onboard BL616 µC is presently supported for TN20K, Console 60K and Primer25k board. WIFI modem is supported on Console 60K too (requires antenna)
 
 The project based on an Apple ``][+`` FPGA implementation.  
 Original for the DE2: https://www.cs.columbia.edu/~sedwards/apple2fpga/  
@@ -47,7 +49,7 @@ Features:
 * SSC configuartion
 * Tape loading via the UART RX pin (ADT Pro)
 * Selectable mixed mode text color artifacts
-* FPGA Companion WIFI modem via SSC (M0S Dock, PiPico W, Console 60K/138k onboard BL616)
+* FPGA Companion WIFI modem via SSC (M0S Dock, PiPico W, Console 60K onboard BL616)
 
 <img src="./.assets/apple2.png" alt="image" width="80%" height="auto">
 
@@ -181,8 +183,8 @@ USB Mouse as Joystick.
 
 | LED | function         |TN9K  |TN20K |TP20K  |TP25K  |TM60K   |TM138k|Console60k/138k|
 | --- |        -         |-     |-     |-      | -     | -      | -    |-         |
-| 0   | FDD1 activity    |-     |x     |-      | -     | x      | x    |x         |
-| 1   | FDD2 activity    |-     |x     |-      | -     | x      | x    |x         |
+| 0   | FDD1 activity    |-     |x     |-      | x     | x      | x    |x         |
+| 1   | FDD2 activity    |-     |x     |-      | x     | x      | x    |x         |
 | 2   | FDD1 mounted     |-     |x     |-      | -     | -      | x    |-         |
 | 3   | FDD2 mounted     |-     |x     |-      | -     | -      | x    |-         |
 | 4   | HDD mounted      |-     |x     |-      | -     | -      | x    |-         |
