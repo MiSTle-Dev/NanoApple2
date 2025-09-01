@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------
---  Nano Apple IIe for Tang Console 138k / GW5AST-138B
+--  Nano Apple IIe for Tang Primer 25k / GW5A-25A
 --  2025 Stefan Voss
 --  based on the work of many others
 -------------------------------------------------------------------------
@@ -35,13 +35,12 @@ entity nanoapple2 is
     leds_n      : out std_logic_vector(1 downto 0);
     -- onboard USB-C Tang BL616 UART
     uart_rx     : in std_logic;
-    uart_tx     : out std_logic;
-    -- monitor port
+    --uart_tx     : out std_logic;
+
     bl616_mon_tx : out std_logic;
-    bl616_mon_rx : in std_logic;
     -- external hw pin UART
-    uart_ext_rx : in std_logic;
-    uart_ext_tx : out std_logic;
+--    uart_ext_rx : in std_logic;
+--    uart_ext_tx : out std_logic;
     -- SPI interface Sipeed M0S Dock external BL616 uC
     m0s         : inout std_logic_vector(4 downto 0);
     -- SPI connection to onboard BL616
@@ -50,26 +49,11 @@ entity nanoapple2 is
     spi_dir     : out std_logic;
     spi_dat     : in std_logic;
     spi_irqn    : out std_logic;
-    -- internal lcd
-    lcd_clk     : out std_logic; -- lcd clk
-    lcd_hs      : out std_logic; -- lcd horizontal synchronization
-    lcd_vs      : out std_logic; -- lcd vertical synchronization        
-    lcd_de      : out std_logic; -- lcd data enable     
-    lcd_bl      : out std_logic; -- lcd backlight control
-    lcd_r       : out std_logic_vector(7 downto 0);  -- lcd red
-    lcd_g       : out std_logic_vector(7 downto 0);  -- lcd green
-    lcd_b       : out std_logic_vector(7 downto 0);  -- lcd blue
-    -- audio
-    hp_bck      : out std_logic;
-    hp_ws       : out std_logic;
-    hp_din      : out std_logic;
-    pa_en       : out std_logic;
     --
     tmds_clk_n  : out std_logic;
     tmds_clk_p  : out std_logic;
     tmds_d_n    : out std_logic_vector( 2 downto 0);
     tmds_d_p    : out std_logic_vector( 2 downto 0);
-    pwr_sav     : out std_logic;
     -- sd interface
     sd_clk      : out std_logic;
     sd_cmd      : inout std_logic;
@@ -83,17 +67,7 @@ entity nanoapple2 is
     IO_sdram_dq     : inout std_logic_vector(15 downto 0); -- 16 bit bidirectional data bus
     O_sdram_addr    : out std_logic_vector(12 downto 0); -- 13 bit multiplexed address bus
     O_sdram_ba      : out std_logic_vector(1 downto 0); -- two banks
-    O_sdram_dqm     : out std_logic_vector(1 downto 0); -- 16/2
-    -- Gamepad Dualshock P0
-    ds_clk          : out std_logic;
-    ds_mosi         : out std_logic;
-    ds_miso         : in std_logic;
-    ds_cs           : out std_logic;
-    -- Gamepad DualShock P1
-    ds2_clk       : out std_logic;
-    ds2_mosi      : out std_logic;
-    ds2_miso      : in std_logic;
-    ds2_cs        : out std_logic
+    O_sdram_dqm     : out std_logic_vector(1 downto 0) -- 16/2
     );
 
 end nanoapple2;
@@ -278,7 +252,6 @@ signal spi_io_din     : std_logic;
 signal spi_io_ss      : std_logic;
 signal spi_io_clk     : std_logic;
 signal spi_io_dout    : std_logic;
-signal spi_ext        : std_logic;
 signal mcu_start      : std_logic;
 signal mcu_sys_strobe : std_logic;
 signal mcu_hid_strobe : std_logic;
@@ -372,6 +345,7 @@ signal disk_chg_trg_d     : std_logic;
 signal nullmdm1, nullmdm2 : std_logic;
 signal leds               : std_logic_vector(5 downto 0);
 signal int_out_n          : std_logic;
+signal spi_ext            : std_logic;
 
 component DCS
 generic (
@@ -402,9 +376,38 @@ component CLKDIV
 end component;
 
 begin
-  -- BL616 console to hw pins for external USB-UART adapter
-  uart_tx <= bl616_mon_rx;
+
+--  uart_tx <= bl616_mon_rx;
   bl616_mon_tx <= uart_rx;
+
+  -- ----------------- SPI input parser ----------------------
+
+-- by default the internal SPI is being used. Once there is
+-- a select from the external spi (M0S Dock) , then the connection is being switched
+process (clk_sys, pll_locked)
+begin
+  if pll_locked = '0' then
+    spi_ext <= '0';
+    m0s(3 downto 1 ) <= (others => 'Z');
+    elsif rising_edge(clk_sys) then
+    spi_ext <= spi_ext;
+    if m0s(2) = '0' then
+        spi_ext <= '1';
+    end if;
+  end if;
+end process;
+
+  -- map output data onto both spi outputs
+  spi_io_din  <= m0s(1) when spi_ext = '1' else spi_dat;
+  spi_io_ss   <= m0s(2) when spi_ext = '1' else spi_csn;
+  spi_io_clk  <= m0s(3) when spi_ext = '1' else spi_sclk;
+
+  -- onboard BL616
+  spi_dir     <= spi_io_dout;
+  spi_irqn    <= int_out_n;
+  -- external M0S Dock BL616 / PiPico  / ESP32
+  m0s(0)      <= spi_io_dout;
+  m0s(4)      <= int_out_n;
 
   reset_cold <= system_reset(1) or not pll_locked or pause;
 
@@ -444,7 +447,7 @@ begin
     end if;
   end process;
   
-pll_inst: entity work.Gowin_PLL_138k_ntsc
+pll_inst: entity work.Gowin_PLL_25k_ntsc
 port map (
     lock    => pll_locked,
     clkout0 => clk_pixel_x5,  -- 143M
@@ -452,86 +455,8 @@ port map (
     clkout2 => clk_sys,  -- 28M
     clkout3 => clk_core,  -- 14M
     clkin   => clk_in, -- 50Mhz
-    init_clk => clk_in -- 138k
+    mdclk   => clk_in -- 50Mhz
 );
-
-led_ws2812: entity work.ws2812
-  port map
-  (
-   clk    => clk_sys,
-   color  => ws2812_color,
-   data   => open  --ws2812
-  );
-
-gamepad_p1: entity work.dualshock2
-    port map (
-    clk           => clk_core,
-    rst           => reset,
-    vsync         => vsync,
-    ds2_dat       => ds_miso,
-    ds2_cmd       => ds_mosi,
-    ds2_att       => ds_cs,
-    ds2_clk       => ds_clk,
-    ds2_ack       => '0',
-    analog        => '1',
-    stick_lx      => paddle_1,
-    stick_ly      => paddle_2,
-    stick_rx      => open,
-    stick_ry      => open,
-    key_up        => open,
-    key_down      => open,
-    key_left      => open,
-    key_right     => open,
-    key_l1        => open,
-    key_l2        => open,
-    key_r1        => open,
-    key_r2        => open,
-    key_triangle  => key_triangle,
-    key_square    => key_square,
-    key_circle    => key_circle,
-    key_cross     => key_cross,
-    key_start     => open,
-    key_select    => open,
-    key_lstick    => open,
-    key_rstick    => open,
-    debug1        => open,
-    debug2        => open
-    );
-
-    gamepad_p2: entity work.dualshock2
-    port map (
-    clk           => clk_core,
-    rst           => reset,
-    vsync         => vsync,
-    ds2_dat       => ds2_miso,
-    ds2_cmd       => ds2_mosi,
-    ds2_att       => ds2_cs,
-    ds2_clk       => ds2_clk,
-    ds2_ack       => '0',
-    analog        => '1',
-    stick_lx      => paddle_3,
-    stick_ly      => paddle_4,
-    stick_rx      => open,
-    stick_ry      => open,
-    key_up        => open,
-    key_down      => open,
-    key_left      => open,
-    key_right     => open,
-    key_l1        => open,
-    key_l2        => open,
-    key_r1        => open,
-    key_r2        => open,
-    key_triangle  => key_triangle2,
-    key_square    => key_square2,
-    key_circle    => key_circle2,
-    key_cross     => key_cross2,
-    key_start     => open,
-    key_select    => open,
-    key_lstick    => open,
-    key_rstick    => open,
-    debug1        => open,
-    debug2        => open
-    );
 
 joyUsb1    <= "00" & joystick0(5 downto 4) & x"0";
 joyUsb2    <= "00" & joystick1(5 downto 4) & x"0";
@@ -670,7 +595,7 @@ joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
     NMI_N          => '1',
     ram_we         => we_ram,
     VIDEO          => VIDEO,
-    PALMODE        => '0', -- not system_video_std,
+    PALMODE        => not system_video_std,
     ROMSWITCH      => not system_videorom,
     COLOR_LINE     => COLOR_LINE,
     TEXT_MODE      => TEXT_MODE,
@@ -1003,7 +928,7 @@ end process;
     SW2            => ssc_sw2,
 
     UART_RX        => uart_rx_muxed,
-    UART_TX        => open, -- uart_tx, -- block when using onboard BL616 for companion
+    UART_TX        => open, -- uart_tx,
     UART_CTS       => nullmdm1,
     UART_RTS       => nullmdm1,
     UART_DCD       => nullmdm2,
@@ -1024,8 +949,8 @@ end process;
   );
 
 -- external HW pin UART interface
-uart_rx_muxed <= uart_rx when system_uart = "00" else uart_ext_rx when system_uart = "01" else '1';
-uart_ext_tx <= uart_tx;
+--uart_rx_muxed <= uart_rx when system_uart = "00" else uart_ext_rx when system_uart = "01" else '1';
+--uart_ext_tx <= uart_tx;
 
   mouse : entity work.applemouse port map (
     CLK_14M        => clk_core,
@@ -1130,7 +1055,7 @@ port map(
       clk_pixel_x5 => clk_pixel_x5,
       audio_div    => (others => '0'),
       
-      ntscmode  => '1',
+      ntscmode  => system_video_std,
       vb_in     => vblank,
       hb_in     => hblank,
       hs_in_n   => hsync,
@@ -1156,53 +1081,8 @@ port map(
       tmds_clk_n => tmds_clk_n,
       tmds_clk_p => tmds_clk_p,
       tmds_d_n   => tmds_d_n,
-      tmds_d_p   => tmds_d_p,
-
-      lcd_clk  => lcd_clk,
-      lcd_hs_n => lcd_hs,
-      lcd_vs_n => lcd_vs,
-      lcd_de   => lcd_de,
-      lcd_r    => lcd_r,
-      lcd_g    => lcd_g,
-      lcd_b    => lcd_b,
-      lcd_bl   => lcd_bl,
-
-      hp_bck   => hp_bck,
-      hp_ws    => hp_ws,
-      hp_din   => hp_din,
-      pa_en    => pa_en
+      tmds_d_p   => tmds_d_p
       );
-
-pwr_sav <= '1';
-
--- ----------------- SPI input parser ----------------------
-
--- by default the internal SPI is being used. Once there is
--- a select from the external spi (M0S Dock) , then the connection is being switched
-process (clk_sys, pll_locked)
-begin
-  if pll_locked = '0' then
-    spi_ext <= '0';
-    m0s(3 downto 1 ) <= (others => 'Z');
-  elsif rising_edge(clk_sys) then
-    spi_ext <= spi_ext;
-    if m0s(2) = '0' then
-        spi_ext <= '1';
-    end if;
-  end if;
-end process;
-
-  -- map output data onto both spi outputs
-  spi_io_din  <= m0s(1) when spi_ext = '1' else spi_dat;
-  spi_io_ss   <= m0s(2) when spi_ext = '1' else spi_csn;
-  spi_io_clk  <= m0s(3) when spi_ext = '1' else spi_sclk;
-
-  -- onboard BL616
-  spi_dir     <= spi_io_dout;
-  spi_irqn    <= int_out_n;
-  -- external M0S Dock BL616 / PiPico  / ESP32
-  m0s(0)      <= spi_io_dout;
-  m0s(4)      <= int_out_n;
 
 mcu_spi_inst: entity work.mcu_spi 
 port map (
@@ -1311,9 +1191,9 @@ module_inst: entity work.sysctrl
   int_in              => unsigned'(x"0" & sdc_int & '0' & hid_int & '0'),
   int_ack             => int_ack,
 
-  buttons             => unsigned'(not user & not s2_reset), -- S0 and S1 buttons on Tang Nano 20k
-  leds                => open,-- two leds can be controlled from the MCU
-  color               => ws2812_color -- a 24bit color to e.g. be used to drive the ws2812
+  buttons             => unsigned'(user & s2_reset), -- S0 and S1 buttons on Tang Nano 20k
+  leds                => open,
+  color               => open
 );
 
 sdc_iack <= int_ack(3);

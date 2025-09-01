@@ -36,7 +36,7 @@ entity nanoapple2 is
     -- onboard USB-C Tang BL616 UART
     uart_rx     : in std_logic;
     uart_tx     : out std_logic;
-
+    -- monitor port
     twimux       : out std_logic_vector(2 downto 0);
     bl616_mon_tx : out std_logic;
     bl616_mon_rx : in std_logic;
@@ -1316,7 +1316,7 @@ module_inst: entity work.sysctrl
   int_in              => unsigned'(x"0" & sdc_int & '0' & hid_int & '0'),
   int_ack             => int_ack,
 
-  buttons             => unsigned'(not s2_reset & not user), -- S0 and S1 buttons on Tang Nano 20k
+  buttons             => unsigned'(not user & not s2_reset), -- S0 and S1 buttons on Tang Nano 20k
   leds                => open,-- two leds can be controlled from the MCU
   color               => ws2812_color -- a 24bit color to e.g. be used to drive the ws2812
 );

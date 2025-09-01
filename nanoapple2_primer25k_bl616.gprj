@@ -3,7 +3,7 @@
 <Project>
     <Template>FPGA</Template>
     <Version>5</Version>
-    <Device name="GW5AST-138B" pn="GW5AST-LV138FPG676AC1/I0">gw5ast138b-007</Device>
+    <Device name="GW5A-25A" pn="GW5A-LV25MG121NC1/I0">gw5a25a-002</Device>
     <FileList>
         <File path="mockingboard/jt49/filter/jt49_dcrm.v" type="file.verilog" enable="1"/>
         <File path="mockingboard/jt49/filter/jt49_dcrm2.v" type="file.verilog" enable="1"/>
@@ -24,6 +24,10 @@
         <File path="src/dualshock2.v" type="file.verilog" enable="1"/>
         <File path="src/floppy_track.sv" type="file.verilog" enable="1"/>
         <File path="src/gen_uart.v" type="file.verilog" enable="1"/>
+        <File path="src/gowin_dpb/gowin_dpb_trkbuf.v" type="file.verilog" enable="1"/>
+        <File path="src/gowin_dpb/sector_dpram.v" type="file.verilog" enable="1"/>
+        <File path="src/gowin_prom/gowin_prom_uc.v" type="file.verilog" enable="1"/>
+        <File path="src/gowin_sp/gowin_sp_128b.v" type="file.verilog" enable="1"/>
         <File path="src/hdmi/audio_clock_regeneration_packet.sv" type="file.verilog" enable="1"/>
         <File path="src/hdmi/audio_info_frame.sv" type="file.verilog" enable="1"/>
         <File path="src/hdmi/audio_sample_packet.sv" type="file.verilog" enable="1"/>
@@ -45,13 +49,8 @@
         <File path="src/misc/sysctrl.v" type="file.verilog" enable="1"/>
         <File path="src/misc/video.v" type="file.verilog" enable="1"/>
         <File path="src/misc/video_analyzer.v" type="file.verilog" enable="1"/>
-        <File path="src/misc/ws2812.v" type="file.verilog" enable="1"/>
         <File path="src/sdram.v" type="file.verilog" enable="1"/>
-        <File path="src/tang/mega138kpro/pll_init.v" type="file.verilog" enable="1"/>
-        <File path="src/tang/console138k/gowin_dpb/gowin_dpb_trkbuf.v" type="file.verilog" enable="1"/>
-        <File path="src/tang/console138k/gowin_dpb/sector_dpram.v" type="file.verilog" enable="1"/>
-        <File path="src/tang/console138k/gowin_prom/gowin_prom_uc.v" type="file.verilog" enable="1"/>
-        <File path="src/tang/console138k/gowin_sp/gowin_sp_128b.v" type="file.verilog" enable="1"/>
+        <File path="src/tang/primer25k_bl616/pll_init.v" type="file.verilog" enable="1"/>
         <File path="src/uart6551/io_fifo.v" type="file.verilog" enable="1"/>
         <File path="src/uart6551/uart_6551.v" type="file.verilog" enable="1"/>
         <File path="T65/T65.vhd" type="file.vhdl" enable="1"/>
@@ -70,23 +69,23 @@
         <File path="src/disk_ii.vhd" type="file.vhdl" enable="1"/>
         <File path="src/disk_ii_rom.vhd" type="file.vhdl" enable="1"/>
         <File path="src/drive_ii.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/gowin_pll/gowin_pll_138kpro_ntsc.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/gowin_pll/gowin_pll_138kpro_ntsc_mod.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/gowin_dpb/gowin_dpb_track_buffer_b.vhd" type="file.vhdl" enable="1"/>
         <File path="src/gowin_prom/gowin_prom_apple2.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/gowin_prom/gowin_prom_key.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/gowin_sdpb/gowin_sdpb_8k_gw5a.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/gowin_sdpb/gowin_sdpb_palette_gw5a.vhd" type="file.vhdl" enable="1"/>
         <File path="src/hdd.vhd" type="file.vhdl" enable="1"/>
         <File path="src/hdd_rom.vhd" type="file.vhdl" enable="1"/>
         <File path="src/keyboard.vhd" type="file.vhdl" enable="1"/>
         <File path="src/ssc.vhd" type="file.vhdl" enable="1"/>
         <File path="src/ssc_rom.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/console138k/gowin_dpb/gowin_dpb_track_buffer_b.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/console138k/gowin_prom/gowin_prom_key.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/console138k/gowin_sdpb/gowin_sdpb_8k_gw5a.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/console138k/gowin_sdpb/gowin_sdpb_palette_gw5a.vhd" type="file.vhdl" enable="1"/>
         <File path="src/tang/console60k/vga_controller.vhd" type="file.vhdl" enable="1"/>
         <File path="src/tang/console60k/video_generator.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/mega138kpro/nanoapple2.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/tang/primer25k_bl616/gowin_pll_25k_ntsc.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/tang/primer25k_bl616/gowin_pll_25k_ntsc_mod.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/tang/primer25k_bl616/nanoapple2.vhd" type="file.vhdl" enable="1"/>
         <File path="src/timing_generator.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/mega138kpro/nanoapple2_tm138kpro.cst" type="file.cst" enable="1"/>
-        <File path="src/tang/mega138kpro/nanoapple2_tm138kpro.sdc" type="file.sdc" enable="1"/>
+        <File path="src/tang/primer25k_bl616/nanoapple2_tp25k.cst" type="file.cst" enable="1"/>
+        <File path="src/tang/primer25k_bl616/nanoapple2_tp25k.sdc" type="file.sdc" enable="1"/>
     </FileList>
 </Project>
