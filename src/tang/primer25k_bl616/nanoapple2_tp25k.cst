@@ -16,8 +16,10 @@ IO_LOC "uart_rx" B3;
 IO_PORT "uart_rx" IO_TYPE=LVCMOS33;
 //IO_PORT "uart_tx" IO_TYPE=LVCMOS33;
 
-IO_LOC "bl616_mon_tx" K11;
-IO_PORT "bl616_mon_tx" DRIVE=4 IO_TYPE=LVCMOS33;
+IO_LOC "bl616_mon_tx" L6; // re-use USB A positive
+IO_PORT "bl616_mon_tx" DRIVE=4 IO_TYPE=LVCMOS33 BANK_VCCIO=3.3;
+//IO_LOC "bl616_mon_rx" K6; // re-use USB-A negative
+//IO_PORT "bl616_mon_rx" PULL_MODE=UP IO_TYPE=LVCMOS33 BANK_VCCIO=3.3;
 
 // HDMI (USB-A side PMOD)
 IO_LOC "tmds_clk_p" H5,J5;
