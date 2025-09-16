@@ -29,6 +29,8 @@ use ieee.numeric_std.all;
 
 entity nanoapple2 is
   port (
+    jtagseln    : out std_logic;
+    reconfign   : out std_logic;
     clk_in      : in std_logic;
     s2_reset    : in std_logic; -- S2 button
     user        : in std_logic; -- S1 button
@@ -405,6 +407,12 @@ component CLKDIV
 end component;
 
 begin
+
+--JTAGSEL_N = 0, TMS, TCK, TDI, and TDO are used as configuration pins
+--JTAGSEL_N = 1, TMS, TCK, TDI, and TDO are used as GPIO after configuration
+  jtagseln <= pll_locked;
+  reconfign <= 'Z';
+
   twimux <= "100"; -- connect bl616 TWI4 PLL1
   uart_tx <= bl616_mon_rx;
   bl616_mon_tx <= uart_rx;
@@ -449,13 +457,13 @@ begin
   
 pll_inst: entity work.Gowin_PLL_138kpro_ntsc
 port map (
-    lock    => pll_locked,
+    clkin    => clk_in, -- 50Mhz
+    lock     => pll_locked,
     init_clk => clk_in,
-    clkout0 => clk_pixel_x5,  -- 143M
-    clkout1 => open, -- 71M
-    clkout2 => clk_sys,  -- 28M
-    clkout3 => clk_core, -- 14M
-    clkin   => clk_in -- 50Mhz
+    clkout0  => clk_pixel_x5,  -- 143M
+    clkout1  => open, -- 71M
+    clkout2  => clk_sys,  -- 28M
+    clkout3  => clk_core -- 14M
 );
 
 led_ws2812: entity work.ws2812
