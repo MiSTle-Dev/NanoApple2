@@ -395,8 +395,7 @@ end component;
 
 component CLKDIV
     generic (
-        DIV_MODE : STRING := "2";
-        GSREN: in string := "false"
+        DIV_MODE : STRING := "2"
     );
     port (
         CLKOUT: out std_logic;
@@ -412,8 +411,8 @@ begin
 --JTAGSEL_N = 1, TMS, TCK, TDI, and TDO are used as GPIO after configuration
   jtagseln <= pll_locked;
   reconfign <= 'Z';
+  twimux <= "100"; -- connect BL616 TWI4 PLL1
 
-  twimux <= "100"; -- connect bl616 TWI4 PLL1
   uart_tx <= bl616_mon_rx;
   bl616_mon_tx <= uart_rx;
 
@@ -454,16 +453,35 @@ begin
       end if;
     end if;
   end process;
-  
+
 pll_inst: entity work.Gowin_PLL_138kpro_ntsc
 port map (
-    clkin    => clk_in, -- 50Mhz
-    lock     => pll_locked,
+    clkin    => clk_in,
     init_clk => clk_in,
-    clkout0  => clk_pixel_x5,  -- 143M
-    clkout1  => open, -- 71M
-    clkout2  => clk_sys,  -- 28M
-    clkout3  => clk_core -- 14M
+    lock     => pll_locked,
+    clkout0  => clk_pixel_x5
+);
+
+div1_28mhz: CLKDIV
+generic map(
+    DIV_MODE => "5"
+)
+port map(
+    CLKOUT => clk_sys,
+    HCLKIN => clk_pixel_x5,
+    RESETN => pll_locked,
+    CALIB  => '0'
+);
+
+div2_14mhz: CLKDIV
+generic map(
+  DIV_MODE => "2"
+)
+port map(
+    CLKOUT => clk_core,
+    HCLKIN => clk_sys,
+    RESETN => pll_locked,
+    CALIB  => '0'
 );
 
 led_ws2812: entity work.ws2812
@@ -1189,33 +1207,20 @@ port map(
       );
 
 -- ----------------- SPI input parser ----------------------
+-- external M0S Dock BL616 / PiPico  / ESP32
+--spi_io_din  <= m0s(1);
+--spi_io_ss   <= m0s(2);
+--spi_io_clk  <= m0s(3);
+--m0s(0)      <= spi_io_dout;
+--m0s(4)      <= int_out_n;
 
--- by default the internal SPI is being used. Once there is
--- a select from the external spi (M0S Dock) , then the connection is being switched
-process (clk_sys, pll_locked)
-begin
-  if pll_locked = '0' then
-    spi_ext <= '0';
-    m0s(3 downto 1 ) <= (others => 'Z');
-  elsif rising_edge(clk_sys) then
-    spi_ext <= spi_ext;
-    if m0s(2) = '0' then
-        spi_ext <= '1';
-    end if;
-  end if;
-end process;
+-- onboard BL616 MCU
 
-  -- map output data onto both spi outputs
-  spi_io_din  <= m0s(1) when spi_ext = '1' else spi_dat;
-  spi_io_ss   <= m0s(2) when spi_ext = '1' else spi_csn;
-  spi_io_clk  <= m0s(3) when spi_ext = '1' else spi_sclk;
-
-  -- onboard BL616
+  spi_io_din  <= spi_dat;
+  spi_io_ss   <= spi_csn;
+  spi_io_clk  <= spi_sclk;
   spi_dir     <= spi_io_dout;
   spi_irqn    <= int_out_n;
-  -- external M0S Dock BL616 / PiPico  / ESP32
-  m0s(0)      <= spi_io_dout;
-  m0s(4)      <= int_out_n;
 
 mcu_spi_inst: entity work.mcu_spi 
 port map (
