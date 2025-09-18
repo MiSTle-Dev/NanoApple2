@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------
---  Nano Apple IIe for Tang Mega 138k Pro / GW5AST-LV138
+--  Nano Apple IIe for Tang Console 138k / GW5AST-138B
 --  2025 Stefan Voss
 --  based on the work of many others
 -------------------------------------------------------------------------
@@ -29,27 +29,36 @@ use ieee.numeric_std.all;
 
 entity nanoapple2 is
   port (
+    jtagseln    : out std_logic;
+    reconfign   : out std_logic;
     clk_in      : in std_logic;
     s2_reset    : in std_logic; -- S2 button
     user        : in std_logic; -- S1 button
-    leds_n      : out std_logic_vector(5 downto 0);
+    leds_n      : out std_logic_vector(1 downto 0);
     -- onboard USB-C Tang BL616 UART
     uart_rx     : in std_logic;
     uart_tx     : out std_logic;
+    -- monitor port
+    bl616_mon_tx : out std_logic;
+    bl616_mon_rx : in std_logic;
     -- external hw pin UART
     uart_ext_rx : in std_logic;
     uart_ext_tx : out std_logic;
-    -- SPI interface Sipeed M0S Dock external BL616 uC
-    m0s         : inout std_logic_vector(4 downto 0);
+    -- SPI connection to onboard BL616
+    spi_sclk    : in std_logic;
+    spi_csn     : in std_logic;
+    spi_dir     : out std_logic;
+    spi_dat     : in std_logic;
+    spi_irqn    : out std_logic;
     -- internal lcd
     lcd_clk     : out std_logic; -- lcd clk
     lcd_hs      : out std_logic; -- lcd horizontal synchronization
     lcd_vs      : out std_logic; -- lcd vertical synchronization        
     lcd_de      : out std_logic; -- lcd data enable     
     lcd_bl      : out std_logic; -- lcd backlight control
-    lcd_r       : out std_logic_vector(5 downto 0);  -- lcd red
-    lcd_g       : out std_logic_vector(5 downto 0);  -- lcd green
-    lcd_b       : out std_logic_vector(5 downto 0);  -- lcd blue
+    lcd_r       : out std_logic_vector(7 downto 0);  -- lcd red
+    lcd_g       : out std_logic_vector(7 downto 0);  -- lcd green
+    lcd_b       : out std_logic_vector(7 downto 0);  -- lcd blue
     -- audio
     hp_bck      : out std_logic;
     hp_ws       : out std_logic;
@@ -60,12 +69,11 @@ entity nanoapple2 is
     tmds_clk_p  : out std_logic;
     tmds_d_n    : out std_logic_vector( 2 downto 0);
     tmds_d_p    : out std_logic_vector( 2 downto 0);
+    pwr_sav     : out std_logic;
     -- sd interface
     sd_clk      : out std_logic;
     sd_cmd      : inout std_logic;
     sd_dat      : inout std_logic_vector(3 downto 0);
-    -- multicolor LED
-    ws2812       : out std_logic;
     -- MiSTer SDRAM module
     O_sdram_clk     : out std_logic;
     O_sdram_cs_n    : out std_logic; -- chip select
@@ -394,6 +402,14 @@ end component;
 
 begin
 
+--JTAGSEL_N = 0, TMS, TCK, TDI, and TDO are used as configuration pins
+--JTAGSEL_N = 1, TMS, TCK, TDI, and TDO are used as GPIO after configuration
+  jtagseln <= pll_locked;
+  reconfign <= 'Z';
+
+  uart_tx <= bl616_mon_rx;
+  bl616_mon_tx <= uart_rx;
+
   reset_cold <= system_reset(1) or not pll_locked or pause;
 
   process(clk_sys, pll_locked)
@@ -432,7 +448,7 @@ begin
     end if;
   end process;
 
-pll_inst: entity work.Gowin_PLL_138kpro_ntsc
+pll_inst: entity work.Gowin_PLL_138k_ntsc
 port map (
     clkin    => clk_in,
     init_clk => clk_in,
@@ -461,14 +477,6 @@ port map(
     RESETN => pll_locked,
     CALIB  => '0'
 );
-
-led_ws2812: entity work.ws2812
-  port map
-  (
-   clk    => clk_sys,
-   color  => ws2812_color,
-   data   => ws2812
-  );
 
 gamepad_p1: entity work.dualshock2
     port map (
@@ -883,13 +891,9 @@ sdcard_interface2: entity work.floppy_track port map (
     TRACK2_BUSY    => TRACK2_RAM_BUSY
     );
 
-  leds_n <= not leds;
-  leds(0) <= D1_ACTIVE;
-  leds(1) <= D2_ACTIVE;
-  leds(2) <= DISK_MOUNT(0);
-  leds(3) <= DISK_MOUNT(1);
-  leds(4) <= hdd_mounted;
-  leds(5) <= '0';
+  leds_n(1 downto 0) <= not leds(1 downto 0);
+  leds(0) <= D1_ACTIVE or D2_ACTIVE;
+  leds(1) <= '0';
 
   mb : entity  work.mockingboard port map (
       CLK_14M      => clk_core,
@@ -1014,7 +1018,7 @@ end process;
     SW2            => ssc_sw2,
 
     UART_RX        => uart_rx_muxed,
-    UART_TX        => uart_tx,
+    UART_TX        => open, -- uart_tx, -- block when using onboard BL616 for companion
     UART_CTS       => nullmdm1,
     UART_RTS       => nullmdm1,
     UART_DCD       => nullmdm2,
@@ -1133,7 +1137,7 @@ audio_sp(9 downto 8) <= (others => '0');
 video_inst: entity work.video
 generic map
 (
-  STEREO  => true
+  STEREO  => false
 )
 port map(
       pll_lock     => pll_locked, 
@@ -1141,7 +1145,7 @@ port map(
       clk_pixel_x5 => clk_pixel_x5,
       audio_div    => (others => '0'),
       
-      ntscmode  => '1', -- system_video_std,
+      ntscmode  => '1',
       vb_in     => vblank,
       hb_in     => hblank,
       hs_in_n   => hsync,
@@ -1173,9 +1177,9 @@ port map(
       lcd_hs_n => lcd_hs,
       lcd_vs_n => lcd_vs,
       lcd_de   => lcd_de,
-      lcd_r(7 downto 2) => lcd_r,
-      lcd_g(7 downto 2) => lcd_g,
-      lcd_b(7 downto 2) => lcd_b,
+      lcd_r    => lcd_r,
+      lcd_g    => lcd_g,
+      lcd_b    => lcd_b,
       lcd_bl   => lcd_bl,
 
       hp_bck   => hp_bck,
@@ -1184,13 +1188,23 @@ port map(
       pa_en    => pa_en
       );
 
+pwr_sav <= '1';
+
 -- ----------------- SPI input parser ----------------------
 -- external M0S Dock BL616 / PiPico  / ESP32
-spi_io_din  <= m0s(1);
-spi_io_ss   <= m0s(2);
-spi_io_clk  <= m0s(3);
-m0s(0)      <= spi_io_dout;
-m0s(4)      <= int_out_n;
+--spi_io_din  <= m0s(1);
+--spi_io_ss   <= m0s(2);
+--spi_io_clk  <= m0s(3);
+--m0s(0)      <= spi_io_dout;
+--m0s(4)      <= int_out_n;
+
+-- onboard BL616 MCU
+
+  spi_io_din  <= spi_dat;
+  spi_io_ss   <= spi_csn;
+  spi_io_clk  <= spi_sclk;
+  spi_dir     <= spi_io_dout;
+  spi_irqn    <= int_out_n;
 
 mcu_spi_inst: entity work.mcu_spi 
 port map (
@@ -1300,8 +1314,8 @@ module_inst: entity work.sysctrl
   int_ack             => int_ack,
 
   buttons             => unsigned'(not user & not s2_reset), -- S0 and S1 buttons on Tang Nano 20k
-  leds                => open,-- two leds can be controlled from the MCU
-  color               => ws2812_color -- a 24bit color to e.g. be used to drive the ws2812
+  leds                => open,
+  color               => open
 );
 
 sdc_iack <= int_ack(3);

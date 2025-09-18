@@ -36,20 +36,11 @@ entity nanoapple2 is
     -- onboard USB-C Tang BL616 UART
     uart_rx     : in std_logic;
     uart_tx     : out std_logic;
-    -- monitor port
-    bl616_mon_tx : out std_logic;
-    bl616_mon_rx : in std_logic;
     -- external hw pin UART
     uart_ext_rx : in std_logic;
     uart_ext_tx : out std_logic;
     -- SPI interface Sipeed M0S Dock external BL616 uC
     m0s         : inout std_logic_vector(4 downto 0);
-    -- SPI connection to onboard BL616
-    spi_sclk    : in std_logic;
-    spi_csn     : in std_logic;
-    spi_dir     : out std_logic;
-    spi_dat     : in std_logic;
-    spi_irqn    : out std_logic;
     -- internal lcd
     lcd_clk     : out std_logic; -- lcd clk
     lcd_hs      : out std_logic; -- lcd horizontal synchronization
@@ -390,8 +381,7 @@ end component;
 
 component CLKDIV
     generic (
-        DIV_MODE : STRING := "2";
-        GSREN: in string := "false"
+        DIV_MODE : STRING := "2"
     );
     port (
         CLKOUT: out std_logic;
@@ -402,9 +392,6 @@ component CLKDIV
 end component;
 
 begin
-  -- BL616 console to hw pins for external USB-UART adapter
-  uart_tx <= bl616_mon_rx;
-  bl616_mon_tx <= uart_rx;
 
   reset_cold <= system_reset(1) or not pll_locked or pause;
 
@@ -443,25 +430,36 @@ begin
       end if;
     end if;
   end process;
-  
+
 pll_inst: entity work.Gowin_PLL_138k_ntsc
 port map (
-    lock    => pll_locked,
-    clkout0 => clk_pixel_x5,  -- 143M
-    clkout1 => open, -- 71M
-    clkout2 => clk_sys,  -- 28M
-    clkout3 => clk_core,  -- 14M
-    clkin   => clk_in, -- 50Mhz
-    init_clk => clk_in -- 138k
+    clkin    => clk_in,
+    init_clk => clk_in,
+    lock     => pll_locked,
+    clkout0  => clk_pixel_x5
 );
 
-led_ws2812: entity work.ws2812
-  port map
-  (
-   clk    => clk_sys,
-   color  => ws2812_color,
-   data   => open  --ws2812
-  );
+div1_28mhz: CLKDIV
+generic map(
+    DIV_MODE => "5"
+)
+port map(
+    CLKOUT => clk_sys,
+    HCLKIN => clk_pixel_x5,
+    RESETN => pll_locked,
+    CALIB  => '0'
+);
+
+div2_14mhz: CLKDIV
+generic map(
+  DIV_MODE => "2"
+)
+port map(
+    CLKOUT => clk_core,
+    HCLKIN => clk_sys,
+    RESETN => pll_locked,
+    CALIB  => '0'
+);
 
 gamepad_p1: entity work.dualshock2
     port map (
@@ -1003,7 +1001,7 @@ end process;
     SW2            => ssc_sw2,
 
     UART_RX        => uart_rx_muxed,
-    UART_TX        => open, -- uart_tx, -- block when using onboard BL616 for companion
+    UART_TX        => uart_tx,
     UART_CTS       => nullmdm1,
     UART_RTS       => nullmdm1,
     UART_DCD       => nullmdm2,
@@ -1175,34 +1173,12 @@ port map(
 
 pwr_sav <= '1';
 
--- ----------------- SPI input parser ----------------------
-
--- by default the internal SPI is being used. Once there is
--- a select from the external spi (M0S Dock) , then the connection is being switched
-process (clk_sys, pll_locked)
-begin
-  if pll_locked = '0' then
-    spi_ext <= '0';
-    m0s(3 downto 1 ) <= (others => 'Z');
-  elsif rising_edge(clk_sys) then
-    spi_ext <= spi_ext;
-    if m0s(2) = '0' then
-        spi_ext <= '1';
-    end if;
-  end if;
-end process;
-
-  -- map output data onto both spi outputs
-  spi_io_din  <= m0s(1) when spi_ext = '1' else spi_dat;
-  spi_io_ss   <= m0s(2) when spi_ext = '1' else spi_csn;
-  spi_io_clk  <= m0s(3) when spi_ext = '1' else spi_sclk;
-
-  -- onboard BL616
-  spi_dir     <= spi_io_dout;
-  spi_irqn    <= int_out_n;
-  -- external M0S Dock BL616 / PiPico  / ESP32
-  m0s(0)      <= spi_io_dout;
-  m0s(4)      <= int_out_n;
+-- external M0S Dock BL616 / PiPico  / ESP32
+spi_io_din  <= m0s(1);
+spi_io_ss   <= m0s(2);
+spi_io_clk  <= m0s(3);
+m0s(0)      <= spi_io_dout;
+m0s(4)      <= int_out_n;
 
 mcu_spi_inst: entity work.mcu_spi 
 port map (
@@ -1312,8 +1288,8 @@ module_inst: entity work.sysctrl
   int_ack             => int_ack,
 
   buttons             => unsigned'(not user & not s2_reset), -- S0 and S1 buttons on Tang Nano 20k
-  leds                => open,-- two leds can be controlled from the MCU
-  color               => ws2812_color -- a 24bit color to e.g. be used to drive the ws2812
+  leds                => open,
+  color               => open
 );
 
 sdc_iack <= int_ack(3);

@@ -29,6 +29,8 @@ use ieee.numeric_std.all;
 
 entity nanoapple2 is
   port (
+    jtagseln    : out std_logic;
+    reconfign   : out std_logic;
     clk_in      : in std_logic;
     s2_reset    : in std_logic; -- S2 button
     user        : in std_logic; -- S1 button
@@ -36,11 +38,19 @@ entity nanoapple2 is
     -- onboard USB-C Tang BL616 UART
     uart_rx     : in std_logic;
     uart_tx     : out std_logic;
+    -- monitor port
+    twimux       : out std_logic_vector(2 downto 0);
+    bl616_mon_tx : out std_logic;
+    bl616_mon_rx : in std_logic;
     -- external hw pin UART
     uart_ext_rx : in std_logic;
     uart_ext_tx : out std_logic;
-    -- SPI interface Sipeed M0S Dock external BL616 uC
-    m0s         : inout std_logic_vector(4 downto 0);
+    -- SPI connection to onboard BL616
+    spi_sclk    : in std_logic;
+    spi_csn     : in std_logic;
+    spi_dir     : out std_logic;
+    spi_dat     : in std_logic;
+    spi_irqn    : out std_logic;
     -- internal lcd
     lcd_clk     : out std_logic; -- lcd clk
     lcd_hs      : out std_logic; -- lcd horizontal synchronization
@@ -393,6 +403,15 @@ component CLKDIV
 end component;
 
 begin
+
+--JTAGSEL_N = 0, TMS, TCK, TDI, and TDO are used as configuration pins
+--JTAGSEL_N = 1, TMS, TCK, TDI, and TDO are used as GPIO after configuration
+  jtagseln <= pll_locked;
+  reconfign <= 'Z';
+  twimux <= "100"; -- connect BL616 TWI4 PLL1
+
+  uart_tx <= bl616_mon_rx;
+  bl616_mon_tx <= uart_rx;
 
   reset_cold <= system_reset(1) or not pll_locked or pause;
 
@@ -1014,7 +1033,7 @@ end process;
     SW2            => ssc_sw2,
 
     UART_RX        => uart_rx_muxed,
-    UART_TX        => uart_tx,
+    UART_TX        => open, -- uart_tx,
     UART_CTS       => nullmdm1,
     UART_RTS       => nullmdm1,
     UART_DCD       => nullmdm2,
@@ -1186,11 +1205,19 @@ port map(
 
 -- ----------------- SPI input parser ----------------------
 -- external M0S Dock BL616 / PiPico  / ESP32
-spi_io_din  <= m0s(1);
-spi_io_ss   <= m0s(2);
-spi_io_clk  <= m0s(3);
-m0s(0)      <= spi_io_dout;
-m0s(4)      <= int_out_n;
+--spi_io_din  <= m0s(1);
+--spi_io_ss   <= m0s(2);
+--spi_io_clk  <= m0s(3);
+--m0s(0)      <= spi_io_dout;
+--m0s(4)      <= int_out_n;
+
+-- onboard BL616 MCU
+
+  spi_io_din  <= spi_dat;
+  spi_io_ss   <= spi_csn;
+  spi_io_clk  <= spi_sclk;
+  spi_dir     <= spi_io_dout;
+  spi_irqn    <= int_out_n;
 
 mcu_spi_inst: entity work.mcu_spi 
 port map (

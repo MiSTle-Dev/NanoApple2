@@ -3,7 +3,7 @@
 <Project>
     <Template>FPGA</Template>
     <Version>5</Version>
-    <Device name="GW5AST-138B" pn="GW5AST-LV138PG484AC1/I0">gw5ast138b-011</Device>
+    <Device name="GW5AST-138B" pn="GW5AST-LV138FPG676AC1/I0">gw5ast138b-007</Device>
     <FileList>
         <File path="mockingboard/jt49/filter/jt49_dcrm.v" type="file.verilog" enable="1"/>
         <File path="mockingboard/jt49/filter/jt49_dcrm2.v" type="file.verilog" enable="1"/>
@@ -47,11 +47,11 @@
         <File path="src/misc/video_analyzer.v" type="file.verilog" enable="1"/>
         <File path="src/misc/ws2812.v" type="file.verilog" enable="1"/>
         <File path="src/sdram.v" type="file.verilog" enable="1"/>
-        <File path="src/tang/console138k_bl616/gowin_dpb/gowin_dpb_trkbuf.v" type="file.verilog" enable="1"/>
-        <File path="src/tang/console138k_bl616/gowin_dpb/sector_dpram.v" type="file.verilog" enable="1"/>
-        <File path="src/tang/console138k_bl616/gowin_prom/gowin_prom_uc.v" type="file.verilog" enable="1"/>
-        <File path="src/tang/console138k_bl616/gowin_sp/gowin_sp_128b.v" type="file.verilog" enable="1"/>
-        <File path="src/tang/console138k_bl616/pll_init.v" type="file.verilog" enable="1"/>
+        <File path="src/tang/console138k/gowin_dpb/gowin_dpb_trkbuf.v" type="file.verilog" enable="1"/>
+        <File path="src/tang/console138k/gowin_dpb/sector_dpram.v" type="file.verilog" enable="1"/>
+        <File path="src/tang/console138k/gowin_prom/gowin_prom_uc.v" type="file.verilog" enable="1"/>
+        <File path="src/tang/console138k/gowin_sp/gowin_sp_128b.v" type="file.verilog" enable="1"/>
+        <File path="src/tang/mega138kpro/pll_init.v" type="file.verilog" enable="1"/>
         <File path="src/uart6551/io_fifo.v" type="file.verilog" enable="1"/>
         <File path="src/uart6551/uart_6551.v" type="file.verilog" enable="1"/>
         <File path="T65/T65.vhd" type="file.vhdl" enable="1"/>
@@ -76,17 +76,17 @@
         <File path="src/keyboard.vhd" type="file.vhdl" enable="1"/>
         <File path="src/ssc.vhd" type="file.vhdl" enable="1"/>
         <File path="src/ssc_rom.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/console138k/nanoapple2.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/console138k_bl616/gowin_dpb/gowin_dpb_track_buffer_b.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/console138k_bl616/gowin_pll/gowin_pll_138k_ntsc.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/console138k_bl616/gowin_pll/gowin_pll_138k_ntsc_mod.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/console138k_bl616/gowin_prom/gowin_prom_key.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/console138k_bl616/gowin_sdpb/gowin_sdpb_8k_gw5a.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/console138k_bl616/gowin_sdpb/gowin_sdpb_palette_gw5a.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/tang/console138k/gowin_dpb/gowin_dpb_track_buffer_b.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/tang/console138k/gowin_prom/gowin_prom_key.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/tang/console138k/gowin_sdpb/gowin_sdpb_8k_gw5a.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/tang/console138k/gowin_sdpb/gowin_sdpb_palette_gw5a.vhd" type="file.vhdl" enable="1"/>
         <File path="src/tang/console60k/vga_controller.vhd" type="file.vhdl" enable="1"/>
         <File path="src/tang/console60k/video_generator.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/tang/mega138kpro/gowin_pll_138kpro_ntsc.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/tang/mega138kpro/gowin_pll_138kpro_ntsc_mod.vhd" type="file.vhdl" enable="1"/>
+        <File path="src/tang/mega138kpro_bl616/nanoapple2.vhd" type="file.vhdl" enable="1"/>
         <File path="src/timing_generator.vhd" type="file.vhdl" enable="1"/>
-        <File path="src/tang/console138k/nanoapple2_tc138k.cst" type="file.cst" enable="1"/>
-        <File path="src/tang/console138k/nanoapple2_tc138k.sdc" type="file.sdc" enable="1"/>
+        <File path="src/tang/mega138kpro_bl616/nanoapple2_tm138kpro.cst" type="file.cst" enable="1"/>
+        <File path="src/tang/mega138kpro_bl616/nanoapple2_tm138kpro.sdc" type="file.sdc" enable="1"/>
     </FileList>
 </Project>
