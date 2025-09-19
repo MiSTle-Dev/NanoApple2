@@ -1,0 +1,16 @@
+[General]
+ipc_version=4
+file=gowin_sp_128b
+module=Gowin_SP_128b
+target_device=gw5ast138b-011
+type=ram_sp
+version=3.0
+
+[Config]
+BYTE_SIZE=0
+DEPTH=128
+LANG=0
+READ=0
+RESET_MODE=true
+WIDTH=8
+WRITE=0

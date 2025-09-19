@@ -65,7 +65,7 @@
       </list>
       <list label="Monitor:" id="C" default="0">
  <listentry label="Color" value="0"/>
- <listentry label="B&W" value="1"/>
+ <listentry label="B&amp;W" value="1"/>
  <listentry label="Green" value="2"/>
  <listentry label="Amber" value="3"/>
       </list>
@@ -112,7 +112,7 @@
  <listentry label="Odd" value="1"/>
  <listentry label="Even" value="2"/>
       </list>
-      <list label="Baud Rate:" id="&" default="14">
+      <list label="Baud Rate:" id="&amp;" default="14">
  <listentry label="115200" value="0"/>
  <listentry label="50" value="1"/>
  <listentry label="75" value="2"/>
@@ -159,7 +159,7 @@
 	<listentry label="None" value="0"/>
 	<listentry label="Disk 0" value="1"/>
 	<listentry label="Disk 1" value="2"/>
-	<listentry label="Disk 0&1" value="3"/>
+	<listentry label="Disk 0&amp;1" value="3"/>
       </list>
       <list label="HDD prot.:" id="J" default="1">
 	<listentry label="Off" value="0"/>
