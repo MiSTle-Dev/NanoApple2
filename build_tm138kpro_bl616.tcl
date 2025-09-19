@@ -9,10 +9,10 @@ add_file mouse/pia6821.vhd
 add_file src/dualshock2.v
 add_file src/floppy_track.sv
 add_file src/gen_uart.v
-add_file src/gowin_dpb/gowin_dpb_trkbuf.v
-add_file src/gowin_dpb/sector_dpram.v
-add_file src/gowin_prom/gowin_prom_uc.v
-add_file src/gowin_sp/gowin_sp_128b.v
+add_file src/tang/console138k/gowin_dpb/gowin_dpb_trkbuf.v
+add_file src/tang/console138k/gowin_dpb/sector_dpram.v
+add_file src/tang/console138k/gowin_prom/gowin_prom_uc.v
+add_file src/tang/console138k/gowin_sp/gowin_sp_128b.v
 add_file src/hdmi/audio_clock_regeneration_packet.sv
 add_file src/hdmi/audio_info_frame.sv
 add_file src/hdmi/audio_sample_packet.sv
@@ -51,10 +51,10 @@ add_file src/apple2.vhd
 add_file src/disk_ii.vhd
 add_file src/disk_ii_rom.vhd
 add_file src/drive_ii.vhd
-add_file src/gowin_dpb/gowin_dpb_track_buffer_b.vhd
-add_file src/gowin_prom/gowin_prom_apple2.vhd
-add_file src/gowin_prom/gowin_prom_key.vhd
-add_file src/tang/mega138kpro/gowin_pll_138kpro_ntsc.vhd
+add_file src/tang/console138k/gowin_dpb/gowin_dpb_track_buffer_b.vhd
+add_file src/tang/gowin_prom/gowin_prom_apple2.vhd
+add_file src/tang/console138k/gowin_prom/gowin_prom_key.vhd
+add_file src/tang/mega138kpro_bl616/gowin_pll_138kpro_ntsc.vhd
 add_file src/tang/mega138kpro/gowin_pll_138kpro_ntsc_mod.vhd
 add_file src/tang/mega138kpro/pll_init.v
 add_file src/hdd.vhd
@@ -68,10 +68,10 @@ add_file src/tang/console60k/vga_controller.vhd
 add_file src/tang/console60k/video_generator.vhd
 add_file src/tang/mega138kpro_bl616/nanoapple2_tm138kpro.cst
 add_file src/tang/mega138kpro_bl616/nanoapple2_tm138kpro.sdc
-add_file src/gowin_sdpb/gowin_sdpb_8k_gw5a.vhd
+add_file src/tang/console138k/gowin_sdpb/gowin_sdpb_8k_gw5a.vhd
 add_file src/uart6551/io_fifo.v
 add_file src/uart6551/uart_6551.v
-add_file src/gowin_sdpb/gowin_sdpb_palette_gw5a.vhd
+add_file src/tang/console138k/gowin_sdpb/gowin_sdpb_palette_gw5a.vhd
 add_file mockingboard/jt49/filter/jt49_dcrm.v
 add_file mockingboard/jt49/filter/jt49_dcrm2.v
 add_file mockingboard/jt49/filter/jt49_dly.v
@@ -95,12 +95,15 @@ set_option -use_done_as_gpio 1
 set_option -use_cpu_as_gpio 1
 set_option -use_ready_as_gpio 1
 set_option -use_jtag_as_gpio 1
+set_option -use_mode_as_gpio 0
+set_option -use_i2c_as_gpio 0
 set_option -print_all_synthesis_warning 0
 set_option -show_all_warn 1
 set_option -rw_check_on_ram 0
 set_option -user_code 00000001
 set_option -bit_compress 1
 set_option -multi_boot 0
+#set_option -vccaux 3.3
 set_option -vccx 1.8
 set_option -vcc 0.9
 set_option -power_on_reset_monitor 1
@@ -114,6 +117,13 @@ set_option -cst_warn_to_error 1
 set_option -rpt_auto_place_io_info 1
 set_option -convert_sdp32_36_to_sdp16_18 1
 set_option -correct_hold_violation 1
+set_option -loading_rate 70.000MHz
+
+#set_option -multiboot_mode quad
+#set_option -multiboot_address_width 24
+#set_option -multi_boot 1
+#set_option -mspijump_mode quad
+#set_option -mspi_jump 0
 
 #run syn
 run all

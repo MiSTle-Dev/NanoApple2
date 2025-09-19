@@ -1,0 +1,15 @@
+[General]
+ipc_version=4
+file=gowin_prom_uc
+module=Gowin_pROM_uc
+target_device=gw5ast138b-011
+type=ram_prom
+version=1.0
+
+[Config]
+DEPTH=4096
+LANG=0
+MEM_FILE=../../../../mouse/jt6805/6805.mi
+READ=0
+RESET_MODE=true
+WIDTH=40
