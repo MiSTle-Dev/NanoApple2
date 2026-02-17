@@ -29,18 +29,35 @@ use ieee.numeric_std.all;
 
 entity nanoapple2 is
   port (
+    bl616_jtagsel : in std_logic;
+    jtagseln    : out std_logic := '0';
+    reconfign   : out std_logic := 'Z';
     clk_in      : in std_logic;
-    s2_reset    : in std_logic; -- S2 button
-    user        : in std_logic; -- S1 button
+    key_n       : in std_logic_vector(3 downto 0);
+    key_som_n   : in std_logic; -- SOM button
     leds_n      : out std_logic_vector(5 downto 0);
+    somleds_n   : out std_logic_vector(1 downto 0);
     -- onboard USB-C Tang BL616 UART
     uart_rx     : in std_logic;
-    uart_tx     : out std_logic;
+    --uart_tx     : out std_logic;
     -- external hw pin UART
     uart_ext_rx : in std_logic;
     uart_ext_tx : out std_logic;
-    -- SPI interface Sipeed M0S Dock external BL616 uC
-    m0s         : inout std_logic_vector(4 downto 0);
+    --
+    twimux       : out std_logic_vector(2 downto 0);
+    bl616_mon_tx : out std_logic;
+    -- SPI interface external uC
+    pmod_companion_din : in std_logic;
+    pmod_companion_dout : out std_logic;
+    pmod_companion_ss : in std_logic;
+    pmod_companion_clk : in std_logic;
+    pmod_companion_intn : out std_logic;
+    -- SPI connection to onboard BL616
+    spi_sclk    : in std_logic;
+    spi_csn     : in std_logic;
+    spi_dir     : out std_logic;
+    spi_dat     : in std_logic;
+    spi_irqn    : out std_logic;
     -- internal lcd
     lcd_clk     : out std_logic; -- lcd clk
     lcd_hs      : out std_logic; -- lcd horizontal synchronization
@@ -363,7 +380,12 @@ signal disk_mount_d       : std_logic_vector(1 downto 0);
 signal disk_chg_trg_d     : std_logic;
 signal nullmdm1, nullmdm2 : std_logic;
 signal leds               : std_logic_vector(5 downto 0);
-signal int_out_n          : std_logic;
+signal somleds            : std_logic_vector(1 downto 0);
+signal spi_intn           : std_logic;
+signal boot_button_detected : std_logic := '1';
+signal key_user_n         : std_logic;
+signal key_reset_n        : std_logic;
+signal uart_tx_i          : std_logic;
 
 component DCS
 generic (
@@ -393,6 +415,47 @@ component CLKDIV
 end component;
 
 begin
+
+  key_reset_n <= key_n(0);
+  key_user_n <= key_n(1);
+
+  process (pll_locked)
+  begin
+    if rising_edge(pll_locked) then
+      boot_button_detected <= '1' when key_user_n = '0' or key_reset_n = '0' else '0';
+    end if;
+  end process;
+
+-- enable JTAG if any button has been pressed during boot and also once
+-- the external FPGA Companion has been seen
+  jtagseln <= '1' when (not pll_locked or boot_button_detected or spi_ext or bl616_jtagsel) = '0' else '0';
+  reconfign <= 'Z';  -- <= '0' when bl616_RECONFIGn = '0' else 'Z';
+  twimux <= "100"; -- connect BL616 TWI4 PLL1
+  -- BL616 console to hw pins for external USB-UART adapter
+  bl616_mon_tx <= uart_rx;
+
+  process (clk_sys)
+  begin
+    if rising_edge(clk_sys) then
+      if pll_locked = '0' then
+        spi_ext <= '0';
+      elsif pmod_companion_ss = '0' then
+        spi_ext <= '1';
+      end if;
+    end if;
+  end process;
+
+  spi_io_din <= pmod_companion_din when spi_ext = '1' else spi_dat;
+  spi_io_ss <= pmod_companion_ss when spi_ext = '1' else spi_csn;
+  spi_io_clk <= pmod_companion_clk when spi_ext = '1' else spi_sclk;
+  spi_dir <= spi_io_dout;
+  spi_irqn <= spi_intn;
+  pmod_companion_dout <= spi_io_dout;
+  pmod_companion_intn <= spi_intn;
+
+  somleds_n <=  not somleds;
+  somleds(0) <= not jtagseln;
+  somleds(1) <= not reconfign; 
 
   reset_cold <= system_reset(1) or not pll_locked or pause;
 
@@ -1014,7 +1077,7 @@ end process;
     SW2            => ssc_sw2,
 
     UART_RX        => uart_rx_muxed,
-    UART_TX        => uart_tx,
+    UART_TX        => uart_tx_i,
     UART_CTS       => nullmdm1,
     UART_RTS       => nullmdm1,
     UART_DCD       => nullmdm2,
@@ -1036,7 +1099,7 @@ end process;
 
 -- external HW pin UART interface
 uart_rx_muxed <= uart_rx when system_uart = "00" else uart_ext_rx when system_uart = "01" else '1';
-uart_ext_tx <= uart_tx;
+uart_ext_tx <= uart_tx_i;
 
   mouse : entity work.applemouse port map (
     CLK_14M        => clk_core,
@@ -1184,14 +1247,6 @@ port map(
       pa_en    => pa_en
       );
 
--- ----------------- SPI input parser ----------------------
--- external M0S Dock BL616 / PiPico  / ESP32
-spi_io_din  <= m0s(1);
-spi_io_ss   <= m0s(2);
-spi_io_clk  <= m0s(3);
-m0s(0)      <= spi_io_dout;
-m0s(4)      <= int_out_n;
-
 mcu_spi_inst: entity work.mcu_spi 
 port map (
   clk            => clk_sys,
@@ -1295,11 +1350,11 @@ module_inst: entity work.sysctrl
   port_in_strobe      => serial_rx_strobe,
   port_in_data        => serial_rx_data,
 
-  int_out_n           => int_out_n,
+  int_out_n           => spi_intn,
   int_in              => unsigned'(x"0" & sdc_int & '0' & hid_int & '0'),
   int_ack             => int_ack,
 
-  buttons             => unsigned'(not user & not s2_reset), -- S0 and S1 buttons on Tang Nano 20k
+  buttons             => unsigned'(not key_user_n & not key_reset_n), -- S0 and S1 buttons
   leds                => open,-- two leds can be controlled from the MCU
   color               => ws2812_color -- a 24bit color to e.g. be used to drive the ws2812
 );
