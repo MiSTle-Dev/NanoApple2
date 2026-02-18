@@ -29,20 +29,26 @@ use ieee.numeric_std.all;
 
 entity nanoapple2 is
   port (
+    bl616_jtagsel : in std_logic;
+    jtagseln    : out std_logic;
+    reconfign   : out std_logic := 'Z';
     clk_in      : in std_logic;
-    s2_reset    : in std_logic; -- S2 button
-    user        : in std_logic; -- S1 button
+    key_reset   : in std_logic; -- S2 button high active
+    key_user    : in std_logic; -- S1 button high active
     leds_n      : out std_logic_vector(1 downto 0);
     -- onboard USB-C Tang BL616 UART
-    uart_rx     : in std_logic;
+    --uart_rx     : in std_logic;
     --uart_tx     : out std_logic;
-
-    bl616_mon_tx : out std_logic;
+    --bl616_mon_tx : out std_logic;
     -- external hw pin UART
---    uart_ext_rx : in std_logic;
---    uart_ext_tx : out std_logic;
-    -- SPI interface Sipeed M0S Dock external BL616 uC
-    m0s         : inout std_logic_vector(4 downto 0);
+    --uart_ext_rx : in std_logic;
+    --uart_ext_tx : out std_logic;
+    -- SPI interface external uC
+    pmod_companion_din : in std_logic;
+    pmod_companion_dout : out std_logic;
+    pmod_companion_ss : in std_logic;
+    pmod_companion_clk : in std_logic;
+    pmod_companion_intn : out std_logic;
     -- SPI connection to onboard BL616
     spi_sclk    : in std_logic;
     spi_csn     : in std_logic;
@@ -346,6 +352,8 @@ signal nullmdm1, nullmdm2 : std_logic;
 signal leds               : std_logic_vector(5 downto 0);
 signal int_out_n          : std_logic;
 signal spi_ext            : std_logic;
+signal spi_intn           : std_logic;
+signal boot_button_detected : std_logic := '1';
 
 component DCS
 generic (
@@ -377,37 +385,39 @@ end component;
 
 begin
 
---  uart_tx <= bl616_mon_rx;
-  bl616_mon_tx <= uart_rx;
-
-  -- ----------------- SPI input parser ----------------------
-
--- by default the internal SPI is being used. Once there is
--- a select from the external spi (M0S Dock) , then the connection is being switched
-process (clk_sys, pll_locked)
-begin
-  if pll_locked = '0' then
-    spi_ext <= '0';
-    m0s(3 downto 1 ) <= (others => 'Z');
-    elsif rising_edge(clk_sys) then
-    spi_ext <= spi_ext;
-    if m0s(2) = '0' then
-        spi_ext <= '1';
+  process (pll_locked)
+  begin
+    if rising_edge(pll_locked) then
+      boot_button_detected <= '1' when key_user = '1' or key_reset = '1' else '0';
     end if;
-  end if;
-end process;
+  end process;
 
-  -- map output data onto both spi outputs
-  spi_io_din  <= m0s(1) when spi_ext = '1' else spi_dat;
-  spi_io_ss   <= m0s(2) when spi_ext = '1' else spi_csn;
-  spi_io_clk  <= m0s(3) when spi_ext = '1' else spi_sclk;
+-- enable JTAG if any button has been pressed during boot and also once
+-- the external FPGA Companion has been seen
+  jtagseln <= '1' when (not pll_locked or boot_button_detected or spi_ext or bl616_jtagsel) = '0' else '0';
+  reconfign <= 'Z';  -- <= '0' when bl616_RECONFIGn = '0' else 'Z';
 
-  -- onboard BL616
-  spi_dir     <= spi_io_dout;
-  spi_irqn    <= int_out_n;
-  -- external M0S Dock BL616 / PiPico  / ESP32
-  m0s(0)      <= spi_io_dout;
-  m0s(4)      <= int_out_n;
+  process (clk_sys)
+  begin
+    if rising_edge(clk_sys) then
+      if pll_locked = '0' then
+        spi_ext <= '0';
+      elsif pmod_companion_ss = '0' then
+        spi_ext <= '1';
+      end if;
+    end if;
+  end process;
+
+  spi_io_din <= pmod_companion_din when spi_ext = '1' else spi_dat;
+  spi_io_ss <= pmod_companion_ss when spi_ext = '1' else spi_csn;
+  spi_io_clk <= pmod_companion_clk when spi_ext = '1' else spi_sclk;
+  spi_dir <= spi_io_dout;
+  spi_irqn <= spi_intn;
+  pmod_companion_dout <= spi_io_dout;
+  pmod_companion_intn <= spi_intn;
+
+--  uart_tx <= bl616_mon_rx;
+--  bl616_mon_tx <= uart_rx;
 
   reset_cold <= system_reset(1) or not pll_locked or pause;
 
@@ -1187,11 +1197,11 @@ module_inst: entity work.sysctrl
   port_in_strobe      => serial_rx_strobe,
   port_in_data        => serial_rx_data,
 
-  int_out_n           => int_out_n,
+  int_out_n           => spi_intn,
   int_in              => unsigned'(x"0" & sdc_int & '0' & hid_int & '0'),
   int_ack             => int_ack,
 
-  buttons             => unsigned'(user & s2_reset), -- S0 and S1 buttons on Tang Nano 20k
+  buttons             => unsigned'(key_user & key_reset), -- S2 and S1 buttons
   leds                => open,
   color               => open
 );

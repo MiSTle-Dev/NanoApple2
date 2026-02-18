@@ -54,7 +54,9 @@ add_file src/drive_ii.vhd
 add_file src/gowin_dpb/gowin_dpb_track_buffer_b.vhd
 add_file src/gowin_prom/gowin_prom_apple2.vhd
 add_file src/gowin_prom/gowin_prom_key.vhd
-add_file src/gowin_pll/gowin_pll_60k_ntsc.vhd
+add_file src/tang/console60k/gowin_pll_60k_ntsc.vhd
+add_file src/tang/console60k/gowin_pll_60k_ntsc_mod.vhd
+add_file src/tang/console60k/pll_init.v
 add_file src/hdd.vhd
 add_file src/hdd_rom.vhd
 add_file src/keyboard.vhd
@@ -94,7 +96,7 @@ set_option -use_cpu_as_gpio 1
 set_option -use_ready_as_gpio 1
 set_option -use_sspi_as_gpio 1
 set_option -use_i2c_as_gpio 1
-set_option -use_jtag_as_gpio 0
+set_option -use_jtag_as_gpio 1
 set_option -print_all_synthesis_warning 0
 set_option -show_all_warn 1
 set_option -rw_check_on_ram 0
