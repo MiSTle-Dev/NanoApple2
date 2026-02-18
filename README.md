@@ -14,9 +14,6 @@ The Nano Apple IIe is a port of both [MiSTer](https://github.com/MiSTer-devel/Ap
 
 This project relies on a µC being connected to the FPGA. --> [MiSTle-Dev wiki](https://github.com/MiSTle-Dev/.github/wiki) <--  
 
-> [!NOTE]
-> If you don't need the WIFI modem on a Nano20K/Primer25k then even the onboard BL616 µC (normally used for bitstream programming) can be used. A dedicated FPGA bitstream and FPGA companion firmware is needed in that configuration. The onboard BL616 µC is presently supported for TN20K, Console 60K, Primer25k, Mega138k Pro board. WIFI modem is supported on Console 60K too (requires antenna)
-
 The project based on an Apple ``][+`` FPGA implementation.  
 Original for the DE2: https://www.cs.columbia.edu/~sedwards/apple2fpga/  
 Port for the MiST: http://ws0.org/tag/apple2/  
