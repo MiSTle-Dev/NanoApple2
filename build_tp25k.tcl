@@ -77,12 +77,12 @@ add_file mockingboard/jt49/jt49_div.v
 add_file mockingboard/jt49/jt49_eg.v
 add_file mockingboard/jt49/jt49_exp.v
 add_file mockingboard/jt49/jt49_noise.v
-add_file src/tang/primer25k_bl616/pll_init.v
-add_file src/tang/primer25k_bl616/gowin_pll_25k_ntsc.vhd
-add_file src/tang/primer25k_bl616/gowin_pll_25k_ntsc_mod.vhd
-add_file src/tang/primer25k_bl616/nanoapple2.vhd
-add_file src/tang/primer25k_bl616/nanoapple2_tp25k.cst
-add_file src/tang/primer25k_bl616/nanoapple2_tp25k.sdc
+add_file src/tang/primer25k/pll_init.v
+add_file src/tang/primer25k/gowin_pll_25k_ntsc.vhd
+add_file src/tang/primer25k/gowin_pll_25k_ntsc_mod.vhd
+add_file src/tang/primer25k/nanoapple2.vhd
+add_file src/tang/primer25k/nanoapple2_tp25k.cst
+add_file src/tang/primer25k/nanoapple2_tp25k.sdc
 
 set_option -synthesis_tool gowinsynthesis
 set_option -output_base_name nanoapple2_tp25k
