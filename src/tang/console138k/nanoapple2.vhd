@@ -31,7 +31,6 @@ entity nanoapple2 is
   port (
     bl616_jtagsel : in std_logic;
     jtagseln    : out std_logic := '0';
-    reconfign   : out std_logic := 'Z';
     clk_in      : in std_logic;
     key_reset_n : in std_logic; -- S2 button
     key_user_n  : in std_logic; -- S1 button
@@ -205,6 +204,7 @@ signal SD_DATA_IN2: std_logic_vector(7 downto 0);
 signal SD_DATA_IN3: std_logic_vector(7 downto 0);
 
 signal pll_locked : std_logic;
+signal pll_locked_i : std_logic;
 signal joyx       : std_logic;
 signal joyy       : std_logic;
 signal pdl_strobe : std_logic;
@@ -409,24 +409,17 @@ end component;
 
 begin
 
-  process (pll_locked)
-  begin
-    if rising_edge(pll_locked) then
-      boot_button_detected <= '1' when key_user_n = '0' or key_reset_n = '0' else '0';
-    end if;
-  end process;
-
   -- enable JTAG if any button has been pressed during boot and also once
   -- the external FPGA Companion has been seen
-  jtagseln <= '1' when (not pll_locked or boot_button_detected or spi_ext or bl616_jtagsel) = '0' else '0';
-  reconfign <= 'Z';  -- <= '0' when bl616_RECONFIGn = '0' else 'Z';
-  -- BL616 console to hw pins for external USB-UART adapter
+  jtagseln  <= not bl616_jtagsel or spi_ext;
   bl616_mon_tx <= uart_rx;
 
-  process (clk_sys)
+  process (clk_sys, pll_locked_i)
   begin
-    if rising_edge(clk_sys) then
-      if pll_locked = '0' then
+    if pll_locked_i = '0' then
+        spi_ext <= '0';
+    elsif rising_edge(clk_sys) then
+      if bl616_jtagsel = '1' then
         spi_ext <= '0';
       elsif pmod_companion_ss = '0' then
         spi_ext <= '1';
@@ -484,9 +477,11 @@ pll_inst: entity work.Gowin_PLL_138k_ntsc
 port map (
     clkin    => clk_in,
     init_clk => clk_in,
-    lock     => pll_locked,
+    lock     => pll_locked_i,
     clkout0  => clk_pixel_x5
 );
+
+pll_locked <= pll_locked_i and not bl616_jtagsel;
 
 div1_28mhz: CLKDIV
 generic map(
@@ -495,7 +490,7 @@ generic map(
 port map(
     CLKOUT => clk_sys,
     HCLKIN => clk_pixel_x5,
-    RESETN => pll_locked,
+    RESETN => pll_locked_i,
     CALIB  => '0'
 );
 
@@ -506,7 +501,7 @@ generic map(
 port map(
     CLKOUT => clk_core,
     HCLKIN => clk_sys,
-    RESETN => pll_locked,
+    RESETN => pll_locked_i,
     CALIB  => '0'
 );
 
