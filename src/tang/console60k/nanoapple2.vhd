@@ -31,7 +31,6 @@ entity nanoapple2 is
   port (
     bl616_jtagsel : in std_logic;
     jtagseln    : out std_logic := '0';
-    reconfign   : out std_logic := 'Z';
     clk_in      : in std_logic;
     key_reset_n : in std_logic; -- S2 button
     key_user_n  : in std_logic; -- S1 button
@@ -188,8 +187,8 @@ signal audio       : std_logic;
 
 -- signals to connect sd card emulation with io controller
 signal sd_lba:  std_logic_vector(31 downto 0) := (others => '0');
-signal sd_rd:   std_logic_vector(5 downto 0) := (others => '0');
-signal sd_wr:   std_logic_vector(5 downto 0) := (others => '0');
+signal sd_rd:   std_logic_vector(7 downto 0) := (others => '0');
+signal sd_wr:   std_logic_vector(7 downto 0) := (others => '0');
 signal SD_LBA1:  std_logic_vector(31 downto 0);
 signal SD_LBA2:  std_logic_vector(31 downto 0);
 signal SD_LBA3:  std_logic_vector(31 downto 0);
@@ -299,11 +298,11 @@ signal usb_key        : std_logic_vector(7 downto 0);
 signal ws2812_color   : std_logic_vector(23 downto 0);
 signal system_reset   : std_logic_vector(1 downto 0);
 signal kbd_strobe     : std_logic;
-signal system_wide_screen : std_logic;
+signal system_screen  : std_logic_vector(1 downto 0);
 signal system_scanlines : std_logic_vector(1 downto 0);
 signal system_volume  : std_logic_vector(1 downto 0);
-signal sd_img_size    : std_logic_vector(31 downto 0);
-signal sd_img_mounted : std_logic_vector(5 downto 0);
+signal sd_img_size    : std_logic_vector(63 downto 0);
+signal sd_img_mounted : std_logic_vector(7 downto 0);
 signal sd_busy        : std_logic;
 signal sd_busyD, sd_busyD2 : std_logic;
 signal sd_done        : std_logic;
@@ -420,7 +419,6 @@ begin
 -- enable JTAG if any button has been pressed during boot and also once
 -- the external FPGA Companion has been seen
   jtagseln <= '1' when (not pll_locked or boot_button_detected or spi_ext or bl616_jtagsel) = '0' else '0';
-  reconfign <= 'Z';  -- <= '0' when bl616_RECONFIGn = '0' else 'Z';
   -- BL616 console to hw pins for external USB-UART adapter
   bl616_mon_tx <= uart_rx;
 
@@ -492,13 +490,6 @@ port map (
     mdclk   => clk_in
 );
 
-led_ws2812: entity work.ws2812
-  port map
-  (
-   clk    => clk_sys,
-   color  => ws2812_color,
-   data   => open  --ws2812
-  );
 
 gamepad_p1: entity work.dualshock2
     port map (
@@ -778,8 +769,8 @@ joy_an <= (posy & posx) when system_analogxy = '1' else (posx & posy);
 SD_LBA3 <= std_logic_vector( x"0000" & sector);
 sd_lba <= SD_LBA4 when (sd_rd(4) or sd_wr(4) or sd_rd(3) or sd_wr(3)) = '1' else SD_LBA3 when (sd_rd(2) or sd_wr(2)) = '1' else SD_LBA2 when (sd_rd(1) or sd_wr(1)) = '1' else SD_LBA1;
 sd_wr_data <= SD_DATA_IN3 when (sd_rd(2) or sd_wr(2)) = '1' else SD_DATA_IN2 when (sd_rd(1) or sd_wr(1)) = '1' else SD_DATA_IN1;
-sd_rd(5) <= '0';
-sd_wr(5) <= '0';
+sd_rd(7 downto 5) <= (others => '0');
+sd_wr(7 downto 5) <= (others => '0');
 
 process(clk_sys, pll_locked)
 variable reset_cnt : integer range 0 to 2147483647;
@@ -1167,7 +1158,7 @@ port map(
       clk_pixel_x5 => clk_pixel_x5,
       audio_div    => (others => '0'),
       
-      ntscmode  => system_video_std,
+      ntscmode  => '1',
       vb_in     => vblank,
       hb_in     => hblank,
       hs_in_n   => hsync,
@@ -1186,7 +1177,7 @@ port map(
       mcu_data  => mcu_data_out,
 
       -- values that can be configure by the user via osd
-      system_wide_screen => system_wide_screen,
+      system_screen => system_screen,
       system_scanlines => system_scanlines,
       system_volume => system_volume,
 
@@ -1284,7 +1275,7 @@ module_inst: entity work.sysctrl
   system_reset        => system_reset,
   system_scanlines    => system_scanlines,
   system_volume       => system_volume,
-  system_wide_screen  => system_wide_screen,
+  system_screen       => system_screen,
   system_floppy_wprot => system_floppy_wprot,
   system_port_1       => port_1_sel,
   system_palette      => system_palette,
@@ -1319,14 +1310,14 @@ module_inst: entity work.sysctrl
 
   buttons             => unsigned'(not key_user_n & not key_reset_n), -- S0 and S1 buttons
   leds                => open,-- two leds can be controlled from the MCU
-  color               => ws2812_color -- a 24bit color to e.g. be used to drive the ws2812
+  color               => open -- a 24bit color to e.g. be used to drive the ws2812
 );
 
 sdc_iack <= int_ack(3);
 
 sd_card_inst: entity work.sd_card
 generic map (
-    CLK_DIV  => 1
+    CLK_DIV  => 0
   )
     port map (
     rstn            => pll_locked,
@@ -1385,7 +1376,7 @@ generic map (
     loader_busy       => loader_busy,
     load_rom          => load_rom,
     load_palette      => load_palette,
-    sd_img_size       => sd_img_size,
+    sd_img_size       => sd_img_size(31 downto 0),
   
     ioctl_download    => ioctl_download,
     ioctl_addr        => ioctl_addr,

@@ -168,7 +168,7 @@ begin
         end if;
     end process;
 
-    -- Horizontal and vertical counters
+    -- Horizontal and vertical counters NTSC 250, PAL 200
     V_RESET <= "011111010" when PALMODE = '0' else "011001000";
 
     HVCOUNTERS: process (CLK_14M)
