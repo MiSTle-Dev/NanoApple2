@@ -1,6 +1,6 @@
 
 @echo off
-set GWSH=C:\Gowin\Gowin_V1.9.10.03_x64\IDE\bin\gw_sh
+set GWSH=C:\Gowin\Gowin_V1.9.12.02_x64\IDE\bin\gw_sh
 
 echo.
 echo ============ build nano 20k  ===============
@@ -15,24 +15,18 @@ echo ============ build tm 60k ===============
 echo.
 %GWSH% build_tm60k.tcl
 echo.
-echo.
 echo ============ build tm 138kpro ===============
 echo.
 %GWSH% build_tm138kpro.tcl
 echo.
-echo ============ build tm 138kpro bl616 ===============
-echo.
-%GWSH% build_tm138kpro_bl616.tcl
-echo.
-echo ============ build console 60k onboard bl616 ===============
-echo.
-%GWSH% build_tc60k_bl616.tcl
-echo.
-echo ============ build console 138k onboard bl616 ===============
+echo ============ build console 138k ===============
 echo.
 %GWSH% build_tc138k.tcl
 echo.
-
+echo ============ build primer 25k ===============
+echo.
+%GWSH% build_tp25k.tcl
+echo.
 echo "done."
 dir impl\pnr\*.fs
 

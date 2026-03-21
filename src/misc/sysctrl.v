@@ -40,7 +40,7 @@ module sysctrl (
   output reg [1:0]  system_reset,
   output reg [1:0]  system_scanlines,
   output reg [1:0]  system_volume,
-  output reg        system_wide_screen,
+  output reg [1:0]  system_screen,
   output reg [1:0]  system_floppy_wprot,
   output reg [2:0]  system_port_1,
   output reg [1:0]  system_palette,
@@ -120,7 +120,7 @@ always @(posedge clk) begin
       system_cpu <= 1'b1;
       system_scanlines <= 2'b00;
       system_volume <= 2'b10;
-      system_wide_screen <= 1'b0;
+      system_screen <= 2'b00;
       system_floppy_wprot <= 2'b11;
       system_port_1 <= 3'b000;
       system_palette <= 2'b00;
@@ -218,8 +218,8 @@ always @(posedge clk) begin
                     if(id == "S") system_scanlines <= data_in[1:0];
                     // Value "A": volume mute(0), 33%(1), 66%(2) or 100%(3)
                     if(id == "A") system_volume <= data_in[1:0];
-                    // Value "W": normal 4:3 screen (0), wide 16:9 screen (1)
-                    if(id == "W") system_wide_screen <= data_in[0];
+                    // Value "W": normal (0), overscan (1) or wide (2) screen
+                    if(id == "W") system_screen <= data_in[1:0];
                     // Value "P": floppy write protecion
                     if(id == "P") system_floppy_wprot <= data_in[1:0];
                     // Joystick port  input device selection

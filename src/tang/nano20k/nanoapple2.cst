@@ -1,5 +1,5 @@
-IO_LOC "reconfign" 9;
-IO_PORT "reconfign" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=8 BANK_VCCIO=3.3;
+//IO_LOC "reconfign" 9;
+//IO_PORT "reconfign" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=8 BANK_VCCIO=3.3;
 
 // BL616 console on hw pin for external USB-UART adapter
 IO_LOC "bl616_mon_tx" 48;

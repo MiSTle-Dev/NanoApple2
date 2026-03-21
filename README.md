@@ -21,7 +21,7 @@ Port for the MiST: http://ws0.org/tag/apple2/
 All HID, SDcard and µC firmware by [Till Harbaum](http://www.harbaum.org/till/mist)  
 
 Features:
-* HDMI Video and Audio Output
+* HDMI Video (640/720) and Audio Output
 * TFT-LCD module 800x600 [SH500Q01Z](https://dl.sipeed.com/Accessories/LCD/500Q01Z-00%20spec.pdf) + Speaker support
 * [USB Keyboard](https://en.wikipedia.org/wiki/Computer_keyboard)
 * [USB Gamepad](https://en.wikipedia.org/wiki/Gamepad)

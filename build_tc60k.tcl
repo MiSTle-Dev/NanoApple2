@@ -115,6 +115,7 @@ set_option -cst_warn_to_error 1
 set_option -rpt_auto_place_io_info 1
 set_option -convert_sdp32_36_to_sdp16_18 1
 set_option -correct_hold_violation 1
+set_option -loading_rate 70.000
 
 #run syn
 run all

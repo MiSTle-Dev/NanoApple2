@@ -94,7 +94,6 @@ set_option -use_sspi_as_gpio 1
 set_option -use_done_as_gpio 1
 set_option -use_cpu_as_gpio 1
 set_option -use_ready_as_gpio 1
-set_option -use_sspi_as_gpio 1
 set_option -use_i2c_as_gpio 1
 set_option -use_jtag_as_gpio 1
 set_option -print_all_synthesis_warning 0
@@ -115,6 +114,7 @@ set_option -cst_warn_to_error 1
 set_option -rpt_auto_place_io_info 1
 set_option -convert_sdp32_36_to_sdp16_18 1
 set_option -correct_hold_violation 1
+set_option -loading_rate 70.000
 
 #run syn
 run all
